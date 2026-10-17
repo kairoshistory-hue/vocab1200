@@ -1,0 +1,756 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>단어와 문장 노트</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+:root {
+  --bg: #F4F6F1;
+  --surface: #FFFFFF;
+  --surface-2: #ECF1E9;
+  --ink: #1C2620;
+  --ink-soft: #57685C;
+  --ink-faint: #93A093;
+  --line: #DCE3D8;
+  --accent: #2F6F5E;
+  --accent-strong: #1F5245;
+  --accent-soft: #E1EEE8;
+  --tag-bg: #EFE7D8;
+  --tag-ink: #6B5B34;
+  --highlight: #C8402A;
+  --danger: #B23A2E;
+  --shadow: 0 1px 2px rgba(28, 38, 32, 0.06), 0 8px 24px -12px rgba(28, 38, 32, 0.18);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101712;
+    --surface: #161F19;
+    --surface-2: #1D2721;
+    --ink: #E9EFE7;
+    --ink-soft: #9FB0A4;
+    --ink-faint: #5E6F62;
+    --line: #28352C;
+    --accent: #6FC3A8;
+    --accent-strong: #8AD6BC;
+    --accent-soft: #1B3A30;
+    --tag-bg: #2B2A20;
+    --tag-ink: #D8C79A;
+    --highlight: #FF7A5C;
+    --danger: #FF7A66;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #101712;
+  --surface: #161F19;
+  --surface-2: #1D2721;
+  --ink: #E9EFE7;
+  --ink-soft: #9FB0A4;
+  --ink-faint: #5E6F62;
+  --line: #28352C;
+  --accent: #6FC3A8;
+  --accent-strong: #8AD6BC;
+  --accent-soft: #1B3A30;
+  --tag-bg: #2B2A20;
+  --tag-ink: #D8C79A;
+  --highlight: #FF7A5C;
+  --danger: #FF7A66;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);
+}
+
+* { box-sizing: border-box; }
+
+html { color-scheme: light dark; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: 'Noto Sans KR', ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 40px 20px 96px;
+}
+
+header.top {
+  margin-bottom: 28px;
+}
+
+.eyebrow {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin: 0 0 8px;
+}
+
+h1 {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  font-size: clamp(26px, 4vw, 34px);
+  margin: 0 0 10px;
+  text-wrap: balance;
+  letter-spacing: -0.01em;
+}
+
+.sub {
+  color: var(--ink-soft);
+  font-size: 14.5px;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 60ch;
+}
+
+.toolbar {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search-box {
+  flex: 1 1 220px;
+  position: relative;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 10px 14px 10px 34px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.search-box input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.search-box svg {
+  position: absolute;
+  left: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
+  color: var(--ink-faint);
+  pointer-events: none;
+}
+
+.count-pill {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  background: var(--accent);
+  color: #fff;
+  transition: background 0.15s ease;
+}
+.btn:hover { background: var(--accent-strong); }
+.btn:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }
+
+.btn.secondary {
+  background: var(--surface-2);
+  color: var(--ink);
+}
+.btn.secondary:hover { background: var(--line); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.btn:disabled:hover { background: var(--surface-2); }
+
+.play-status {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 12px;
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  border-radius: 999px;
+  padding: 6px 12px;
+  white-space: nowrap;
+}
+
+/* voice panel */
+.voice-panel {
+  margin-top: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+  display: none;
+}
+.voice-panel.open { display: block; }
+.voice-panel h2 {
+  font-size: 13px;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 10px;
+}
+.voice-note {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--ink-soft);
+  margin: 0 0 14px;
+}
+.voice-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.voice-row select {
+  flex: 1 1 260px;
+  padding: 9px 11px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  font-family: inherit;
+}
+.voice-row select#rate-select {
+  flex: 0 0 140px;
+}
+.voice-row select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+/* add-word panel */
+.add-panel {
+  margin-top: 16px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px;
+  box-shadow: var(--shadow);
+  display: none;
+}
+.add-panel.open { display: block; }
+
+.add-panel h2 {
+  font-size: 13px;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+  margin: 0 0 14px;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.field-grid .full { grid-column: 1 / -1; }
+
+.field label {
+  display: block;
+  font-size: 12px;
+  color: var(--ink-soft);
+  margin-bottom: 5px;
+}
+
+.field input {
+  width: 100%;
+  padding: 9px 11px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  font-size: 14px;
+  font-family: inherit;
+}
+.field input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.add-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+/* entry list */
+main#list {
+  margin-top: 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.entry {
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 4px 14px;
+  padding: 20px 4px;
+  border-bottom: 1px solid var(--line);
+  position: relative;
+  transition: background 0.2s ease;
+}
+
+.entry.playing {
+  background: var(--accent-soft);
+  border-radius: 10px;
+}
+
+.entry .num {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 13px;
+  color: var(--ink-faint);
+  font-variant-numeric: tabular-nums;
+  padding-top: 4px;
+}
+
+.entry .body { min-width: 0; }
+
+.headword-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.headword {
+  font-family: 'Fraunces', Georgia, serif;
+  font-weight: 600;
+  font-size: 21px;
+  letter-spacing: -0.01em;
+  outline: none;
+  border-radius: 4px;
+  padding: 0 2px;
+}
+.headword:focus { background: var(--accent-soft); }
+
+.tag {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 11.5px;
+  color: var(--tag-ink);
+  background: var(--tag-bg);
+  border-radius: 6px;
+  padding: 2px 7px;
+  white-space: pre-line;
+  line-height: 1.4;
+}
+
+.print-card { display: none; }
+
+.reveal-chip {
+  font-family: 'Noto Sans KR', ui-sans-serif, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent-strong);
+  background: var(--accent-soft);
+  border: 1px dashed var(--accent);
+  border-radius: 999px;
+  padding: 3px 11px;
+  cursor: pointer;
+}
+.reveal-chip:hover { background: var(--accent); color: #fff; border-style: solid; }
+.reveal-chip.hide-chip {
+  color: var(--ink-soft);
+  background: var(--surface-2);
+  border: 1px dashed var(--line);
+  margin-left: 6px;
+}
+.reveal-chip.hide-chip:hover { background: var(--ink-soft); color: #fff; border-style: solid; }
+
+.spk {
+  border: none;
+  background: none;
+  color: var(--accent);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  transition: background 0.12s ease;
+}
+.spk:hover { background: var(--accent-soft); }
+.spk:active { transform: scale(0.94); }
+.spk svg { width: 15px; height: 15px; }
+
+.sentence-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.sentence {
+  font-size: 18px;
+  line-height: 1.55;
+  outline: none;
+  border-radius: 4px;
+  padding: 0 2px;
+  flex: 1;
+}
+.sentence:focus { background: var(--accent-soft); }
+
+.sentence .hl {
+  color: var(--highlight);
+  font-weight: 700;
+}
+
+.translation {
+  margin-top: 4px;
+  font-size: 15.5px;
+  color: var(--ink-soft);
+  line-height: 1.5;
+  outline: none;
+  border-radius: 4px;
+  padding: 0 2px;
+}
+.translation:focus { background: var(--accent-soft); }
+
+.entry-actions {
+  position: absolute;
+  right: 2px;
+  top: 16px;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+}
+.entry:hover .entry-actions,
+.entry:focus-within .entry-actions { opacity: 1; }
+
+.icon-btn {
+  border: none;
+  background: none;
+  color: var(--ink-faint);
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.icon-btn:hover { background: var(--accent-soft); color: var(--accent-strong); }
+.icon-btn[data-action="delete"]:hover { background: var(--surface-2); color: var(--danger); }
+.icon-btn svg { width: 14px; height: 14px; }
+
+.entry.editing {
+  background: var(--surface-2);
+  border-radius: 12px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+.entry.editing .field-grid { margin-top: 4px; }
+
+.empty-note {
+  text-align: center;
+  color: var(--ink-faint);
+  font-size: 14px;
+  padding: 60px 20px;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 22px 0;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--line);
+}
+
+.page-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.page-num {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  background: var(--surface-2);
+  border: none;
+  border-radius: 8px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0 6px;
+}
+.page-num:hover { background: var(--line); }
+.page-num.active {
+  background: var(--accent);
+  color: #fff;
+}
+
+.print-list { display: none; }
+
+.save-flag {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: var(--ink);
+  color: var(--bg);
+  font-size: 13px;
+  padding: 9px 16px;
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  z-index: 10;
+}
+.save-flag.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.hint-typo {
+  color: var(--highlight);
+}
+
+footer.foot {
+  margin-top: 40px;
+  color: var(--ink-faint);
+  font-size: 12.5px;
+  text-align: center;
+  line-height: 1.7;
+}
+
+@media (max-width: 520px) {
+  .entry { grid-template-columns: 30px 1fr; }
+  .field-grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+@media print {
+  @page { size: A4; margin: 12mm 11mm; }
+
+  html, body { background: #fff !important; }
+  body { color: #111 !important; }
+
+  header.top, .save-flag, footer.foot, .entry, .empty-note, .pagination, main#list { display: none !important; }
+
+  .wrap { max-width: 100%; margin: 0; padding: 0; }
+
+  #print-list {
+    display: block;
+    margin-top: 0;
+  }
+
+  /* number | word+sentence (top row) / meaning+translation (bottom row) — a
+     divider line only between entries, no internal lines within a card */
+  .print-card {
+    display: grid;
+    grid-template-columns: calc(30px + 1cm) 150px 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 18px;
+    border-bottom: 1px solid #cfcfcf;
+    /* 10 cards + a page-number footer per A4 page:
+       (297mm - 24mm margin - ~13mm footer) / 10 ≈ 26mm */
+    min-height: 26mm;
+  }
+
+  .print-page-footer {
+    text-align: center;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 11px;
+    color: #888;
+    padding-top: 5mm;
+  }
+  .print-page-footer:not(:last-child) { break-after: page; page-break-after: always; }
+
+  .pc-num {
+    grid-column: 1; grid-row: 1 / 3;
+    display: flex; align-items: flex-start; justify-content: center;
+    margin-left: 1cm;
+    padding-top: 5px;
+    color: #1d4ed8 !important;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 12px; font-weight: 700;
+  }
+
+  .pc-word {
+    grid-column: 2; grid-row: 1;
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 6px;
+  }
+  .pc-emoji { font-size: 19px; line-height: 1; }
+  .pc-headword {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 700;
+    font-size: 18.5px;
+    color: #000 !important;
+  }
+
+  .pc-sentence {
+    grid-column: 3; grid-row: 1;
+    padding: 5px 8px;
+    font-weight: 700;
+    font-size: 16.5px;
+    color: #111 !important;
+    line-height: 1.35;
+  }
+  .pc-sentence .hl {
+    color: #b3261e !important;
+    text-decoration: underline;
+    text-decoration-thickness: 1.4px;
+  }
+
+  .pc-meaning {
+    grid-column: 2; grid-row: 2;
+    padding: 4px 6px;
+    font-size: 11px;
+    color: #333 !important;
+    white-space: pre-line;
+    line-height: 1.35;
+  }
+
+  .pc-translation {
+    grid-column: 3; grid-row: 2;
+    padding: 4px 8px;
+    font-size: 14px;
+    color: #333 !important;
+    line-height: 1.35;
+  }
+
+  .pc-blank {
+    display: inline-block;
+    width: 100%;
+    min-width: 60px;
+    height: 1em;
+    border-bottom: 1px solid #e2e2e2;
+  }
+
+  a[href]:after { content: ""; }
+}
+
+
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <p class="eyebrow">초급 영단어 1200 [실력] · 001&ndash;</p>
+    <h1>단어와 문장 노트</h1>
+    <p class="sub">단어를 문장 속에 넣어 외우는 노트예요. 문장에 등장하는 활용형(과거형·복수형 등)은 자동으로 빨간색으로 표시돼요. 뜻과 해석은 기본적으로 가려져 있으니 스스로 떠올려본 뒤 "👁️ 뜻 보기"를 눌러 확인하세요. 스피커 아이콘을 누르면 영어 발음을 들을 수 있고, 연필 아이콘으로 바로 고칠 수 있어요.</p>
+    <div class="toolbar">
+      <div class="search-box">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="9" r="6.5"></circle><path d="M17.5 17.5L13.5 13.5" stroke-linecap="round"></path></svg>
+        <input id="search" type="text" placeholder="단어 또는 뜻 검색" autocomplete="off">
+      </div>
+      <span class="count-pill" id="count-pill">0개</span>
+      <button class="btn secondary" id="toggle-study-mode">🙈 뜻 가리기: 켜짐</button>
+      <button class="btn secondary" id="toggle-voice">🔊 발음 설정</button>
+      <button class="btn secondary" id="continuous-play-btn" title="지금 보이는 Day의 예문 발음을 순서대로 이어 재생해요">▶️ 예문 연속재생</button>
+      <span class="play-status" id="play-status" hidden></span>
+      <button class="btn secondary" id="print-btn" title="검색으로 목록을 좁힌 상태라면 그 목록만 인쇄돼요">🖨️ 인쇄 (A4)</button>
+      <button class="btn" id="toggle-add">+ 단어 추가</button>
+    </div>
+    <div class="voice-panel" id="voice-panel">
+      <h2>발음에 사용할 음성 고르기</h2>
+      <p class="voice-note">이 페이지는 브라우저에 이미 설치된 음성으로 소리를 냅니다. 보안 정책상 이 페이지가 네이버·구글 번역·옥스퍼드 같은 외부 사이트의 오디오를 실시간으로 불러오는 것은 막혀 있고, 그 사이트들의 녹음 음원을 그대로 저장해 배포하는 것도 저작권상 어렵습니다. 대신 데스크톱 크롬(Chrome)에는 구글 번역과 같은 엔진의 <b>"Google US English"</b> 음성이 기본으로 들어있는 경우가 많아요 — 아래 목록에 있다면 그 음성을 선택하면 구글 번역과 가장 비슷한 발음을 들을 수 있습니다. 없다면 Mac Safari의 "Ava"·"Samantha", Edge의 "Online (Natural)" 계열도 자연스러운 편이에요.</p>
+      <div class="voice-row">
+        <select id="voice-select"></select>
+        <select id="rate-select">
+          <option value="0.6">0.6배속</option>
+          <option value="0.7">0.7배속</option>
+          <option value="0.8">0.8배속</option>
+          <option value="0.9" selected>0.9배속</option>
+          <option value="1">1.0배속 (기본)</option>
+          <option value="1.1">1.1배속</option>
+          <option value="1.2">1.2배속</option>
+        </select>
+        <button class="btn secondary" id="voice-preview">미리듣기</button>
+      </div>
+    </div>
+    <div class="add-panel" id="add-panel">
+      <h2>새 단어 추가</h2>
+      <div class="field-grid">
+        <div class="field">
+          <label for="in-word">단어 (영어)</label>
+          <input id="in-word" type="text" placeholder="예: study">
+        </div>
+        <div class="field">
+          <label for="in-meaning">품사 · 뜻</label>
+          <input id="in-meaning" type="text" placeholder="예: 동. 공부하다">
+        </div>
+        <div class="field full">
+          <label for="in-sentence">예문 (영어)</label>
+          <input id="in-sentence" type="text" placeholder="예: She studies English every day.">
+        </div>
+        <div class="field full">
+          <label for="in-translation">예문 해석 (한국어)</label>
+          <input id="in-translation" type="text" placeholder="예: 그녀는 매일 영어를 공부한다.">
+        </div>
+      </div>
+      <div class="add-actions">
+        <button class="btn secondary" id="cancel-add">취소</button>
+        <button class="btn" id="submit-add">추가하기</button>
+      </div>
+    </div>
+  </header>
+
+  <nav class="pagination" id="pagination">
+    <button class="btn secondary" id="page-prev">‹ 이전</button>
+    <span class="page-numbers" id="page-numbers"></span>
+    <button class="btn secondary" id="page-next">다음 ›</button>
+  </nav>
+
+  <main id="list"></main>
+
+  <div id="print-list" class="print-list"></div>
+
+  <footer class="foot">
+    활용형 자동 강조는 규칙 변화(-s, -ed, -ing 등)와 자주 쓰이는 불규칙 동사·명사를 함께 인식해요. 아주 드문 형태는 놓칠 수 있으니 그럴 땐 문장을 클릭해서 직접 고쳐 주세요.<br>
+    인쇄 시 단어 옆 그림은 실제 삽화가 아니라 뜻을 떠올리기 쉽게 붙인 간단한 이모지 아이콘이에요.
+  </footer>
+</div>
+
+<div class="save-flag" id="save-flag">저장됨</div>
+
+<script>
+const HEAD_HTML = "<title>\ub2e8\uc5b4\uc640 \ubb38\uc7a5 \ub178\ud2b8</title>\n<link rel=\"stylesheet\" href=\"https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Noto+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap\">\n<style>\n:root {\n  --bg: #F4F6F1;\n  --surface: #FFFFFF;\n  --surface-2: #ECF1E9;\n  --ink: #1C2620;\n  --ink-soft: #57685C;\n  --ink-faint: #93A093;\n  --line: #DCE3D8;\n  --accent: #2F6F5E;\n  --accent-strong: #1F5245;\n  --accent-soft: #E1EEE8;\n  --tag-bg: #EFE7D8;\n  --tag-ink: #6B5B34;\n  --highlight: #C8402A;\n  --danger: #B23A2E;\n  --shadow: 0 1px 2px rgba(28, 38, 32, 0.06), 0 8px 24px -12px rgba(28, 38, 32, 0.18);\n}\n\n@media (prefers-color-scheme: dark) {\n  :root:not([data-theme=\"light\"]) {\n    --bg: #101712;\n    --surface: #161F19;\n    --surface-2: #1D2721;\n    --ink: #E9EFE7;\n    --ink-soft: #9FB0A4;\n    --ink-faint: #5E6F62;\n    --line: #28352C;\n    --accent: #6FC3A8;\n    --accent-strong: #8AD6BC;\n    --accent-soft: #1B3A30;\n    --tag-bg: #2B2A20;\n    --tag-ink: #D8C79A;\n    --highlight: #FF7A5C;\n    --danger: #FF7A66;\n    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);\n  }\n}\n\n:root[data-theme=\"dark\"] {\n  --bg: #101712;\n  --surface: #161F19;\n  --surface-2: #1D2721;\n  --ink: #E9EFE7;\n  --ink-soft: #9FB0A4;\n  --ink-faint: #5E6F62;\n  --line: #28352C;\n  --accent: #6FC3A8;\n  --accent-strong: #8AD6BC;\n  --accent-soft: #1B3A30;\n  --tag-bg: #2B2A20;\n  --tag-ink: #D8C79A;\n  --highlight: #FF7A5C;\n  --danger: #FF7A66;\n  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 24px -12px rgba(0, 0, 0, 0.5);\n}\n\n* { box-sizing: border-box; }\n\nhtml { color-scheme: light dark; }\n\nbody {\n  margin: 0;\n  background: var(--bg);\n  color: var(--ink);\n  font-family: 'Noto Sans KR', ui-sans-serif, system-ui, sans-serif;\n  -webkit-font-smoothing: antialiased;\n}\n\n.wrap {\n  max-width: 780px;\n  margin: 0 auto;\n  padding: 40px 20px 96px;\n}\n\nheader.top {\n  margin-bottom: 28px;\n}\n\n.eyebrow {\n  font-family: 'IBM Plex Mono', ui-monospace, monospace;\n  font-size: 12px;\n  letter-spacing: 0.12em;\n  text-transform: uppercase;\n  color: var(--accent);\n  margin: 0 0 8px;\n}\n\nh1 {\n  font-family: 'Fraunces', Georgia, serif;\n  font-weight: 600;\n  font-size: clamp(26px, 4vw, 34px);\n  margin: 0 0 10px;\n  text-wrap: balance;\n  letter-spacing: -0.01em;\n}\n\n.sub {\n  color: var(--ink-soft);\n  font-size: 14.5px;\n  line-height: 1.6;\n  margin: 0;\n  max-width: 60ch;\n}\n\n.toolbar {\n  display: flex;\n  gap: 10px;\n  margin-top: 22px;\n  flex-wrap: wrap;\n  align-items: center;\n}\n\n.search-box {\n  flex: 1 1 220px;\n  position: relative;\n}\n\n.search-box input {\n  width: 100%;\n  padding: 10px 14px 10px 34px;\n  border-radius: 10px;\n  border: 1px solid var(--line);\n  background: var(--surface);\n  color: var(--ink);\n  font-size: 14px;\n  font-family: inherit;\n}\n\n.search-box input:focus {\n  outline: 2px solid var(--accent);\n  outline-offset: 1px;\n}\n\n.search-box svg {\n  position: absolute;\n  left: 11px;\n  top: 50%;\n  transform: translateY(-50%);\n  width: 15px;\n  height: 15px;\n  color: var(--ink-faint);\n  pointer-events: none;\n}\n\n.count-pill {\n  font-family: 'IBM Plex Mono', ui-monospace, monospace;\n  font-size: 12.5px;\n  color: var(--ink-soft);\n  background: var(--surface-2);\n  border-radius: 999px;\n  padding: 6px 12px;\n  white-space: nowrap;\n}\n\nbutton {\n  font-family: inherit;\n  cursor: pointer;\n}\n\n.btn {\n  display: inline-flex;\n  align-items: center;\n  gap: 6px;\n  border: none;\n  border-radius: 10px;\n  padding: 10px 16px;\n  font-size: 14px;\n  font-weight: 600;\n  background: var(--accent);\n  color: #fff;\n  transition: background 0.15s ease;\n}\n.btn:hover { background: var(--accent-strong); }\n.btn:focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; }\n\n.btn.secondary {\n  background: var(--surface-2);\n  color: var(--ink);\n}\n.btn.secondary:hover { background: var(--line); }\n.btn:disabled { opacity: 0.5; cursor: default; }\n.btn:disabled:hover { background: var(--surface-2); }\n\n.play-status {\n  font-family: 'IBM Plex Mono', ui-monospace, monospace;\n  font-size: 12px;\n  color: var(--accent-strong);\n  background: var(--accent-soft);\n  border-radius: 999px;\n  padding: 6px 12px;\n  white-space: nowrap;\n}\n\n/* voice panel */\n.voice-panel {\n  margin-top: 16px;\n  background: var(--surface);\n  border: 1px solid var(--line);\n  border-radius: 14px;\n  padding: 18px;\n  box-shadow: var(--shadow);\n  display: none;\n}\n.voice-panel.open { display: block; }\n.voice-panel h2 {\n  font-size: 13px;\n  font-family: 'IBM Plex Mono', ui-monospace, monospace;\n  letter-spacing: 0.06em;\n  text-transform: uppercase;\n  color: var(--ink-soft);\n  margin: 0 0 10px;\n}\n.voice-note {\n  font-size: 13px;\n  line-height: 1.65;\n  color: var(--ink-soft);\n  margin: 0 0 14px;\n}\n.voice-row {\n  display: flex;\n  gap: 8px;\n  flex-wrap: wrap;\n}\n.voice-row select {\n  flex: 1 1 260px;\n  padding: 9px 11px;\n  border-radius: 8px;\n  border: 1px solid var(--line);\n  background: var(--bg);\n  color: var(--ink);\n  font-size: 14px;\n  font-family: inherit;\n}\n.voice-row select#rate-select {\n  flex: 0 0 140px;\n}\n.voice-row select:focus {\n  outline: 2px solid var(--accent);\n  outline-offset: 1px;\n}\n\n/* add-word panel */\n.add-panel {\n  margin-top: 16px;\n  background: var(--surface);\n  border: 1px solid var(--line);\n  border-radius: 14px;\n  padding: 18px;\n  box-shadow: var(--shadow);\n  display: none;\n}\n.add-panel.open { display: block; }\n\n.add-panel h2 {\n  font-size: 13px;\n  font-family: 'IBM Plex Mono', ui-monospace, monospace;\n  letter-spacing: 0.06em;\n  text-transform: uppercase;\n  color: var(--ink-soft);\n  margin: 0 0 14px;\n}\n\n.field-grid {\n  display: grid;\n  grid-template-columns: 1fr 1fr;\n  gap: 12px;\n}\n.field-grid .full { grid-column: 1 / -1; }\n\n.field label {\n  display: block;\n  font-size: 12px;\n  color: var(--ink-soft);\n  margin-bottom: 5px;\n}\n\n.field input {\n  width: 100%;\n  padding: 9px 11px;\n  border-radius: 8px;\n  border: 1px solid var(--line);\n  background: var(--bg);\n  color: var(--ink);\n  font-size: 14px;\n  font-family: inherit;\n}\n.field input:focus {\n  outline: 2px solid var(--accent);\n  outline-offset: 1px;\n}\n\n.add-actions {\n  display: flex;\n  justify-content: flex-end;\n  gap: 8px;\n  margin-top: 14px;\n}\n\n/* entry list */\nmain#list {\n  margin-top: 26px;\n  display: flex;\n  flex-direction: column;\n  gap: 2px;\n}\n\n.entry {\n  display: grid;\n  grid-template-columns: 44px 1fr;\n  gap: 4px 14px;\n  padding: 20px 4px;\n  border-bottom: 1px solid var(--line);\n  position: relative;\n  transition: background 0.2s ease;\n}\n\n.entry.playing {\n  background: var(--accent-soft);\n  border-radius: 10px;\n}\n\n.entry .num {\n  font-family: 'IBM Plex Mono', ui-monospace, monospace;\n  font-size: 13px;\n  color: var(--ink-faint);\n  font-variant-numeric: tabular-nums;\n  padding-top: 4px;\n}\n\n.entry .body { min-width: 0; }\n\n.headword-row {\n  display: flex;\n  align-items: baseline;\n  gap: 8px;\n  flex-wrap: wrap;\n}\n\n.headword {\n  font-family: 'Fraunces', Georgia, serif;\n  font-weight: 600;\n  font-size: 21px;\n  letter-spacing: -0.01em;\n  outline: none;\n  border-radius: 4px;\n  padding: 0 2px;\n}\n.headword:focus { background: var(--accent-soft); }\n\n.tag {\n  font-family: 'IBM Plex Mono', ui-monospace, monospace;\n  font-size: 11.5px;\n  color: var(--tag-ink);\n  background: var(--tag-bg);\n  border-radius: 6px;\n  padding: 2px 7px;\n  white-space: pre-line;\n  line-height: 1.4;\n}\n\n.print-card { display: none; }\n\n.reveal-chip {\n  font-family: 'Noto Sans KR', ui-sans-serif, sans-serif;\n  font-size: 12px;\n  font-weight: 600;\n  color: var(--accent-strong);\n  background: var(--accent-soft);\n  border: 1px dashed var(--accent);\n  border-radius: 999px;\n  padding: 3px 11px;\n  cursor: pointer;\n}\n.reveal-chip:hover { background: var(--accent); color: #fff; border-style: solid; }\n.reveal-chip.hide-chip {\n  color: var(--ink-soft);\n  background: var(--surface-2);\n  border: 1px dashed var(--line);\n  margin-left: 6px;\n}\n.reveal-chip.hide-chip:hover { background: var(--ink-soft); color: #fff; border-style: solid; }\n\n.spk {\n  border: none;\n  background: none;\n  color: var(--accent);\n  width: 26px;\n  height: 26px;\n  border-radius: 50%;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n  flex: none;\n  transition: background 0.12s ease;\n}\n.spk:hover { background: var(--accent-soft); }\n.spk:active { transform: scale(0.94); }\n.spk svg { width: 15px; height: 15px; }\n\n.sentence-row {\n  display: flex;\n  align-items: flex-start;\n  gap: 8px;\n  margin-top: 10px;\n}\n\n.sentence {\n  font-size: 18px;\n  line-height: 1.55;\n  outline: none;\n  border-radius: 4px;\n  padding: 0 2px;\n  flex: 1;\n}\n.sentence:focus { background: var(--accent-soft); }\n\n.sentence .hl {\n  color: var(--highlight);\n  font-weight: 700;\n}\n\n.translation {\n  margin-top: 4px;\n  font-size: 15.5px;\n  color: var(--ink-soft);\n  line-height: 1.5;\n  outline: none;\n  border-radius: 4px;\n  padding: 0 2px;\n}\n.translation:focus { background: var(--accent-soft); }\n\n.entry-actions {\n  position: absolute;\n  right: 2px;\n  top: 16px;\n  display: flex;\n  gap: 4px;\n  opacity: 0;\n  transition: opacity 0.12s ease;\n}\n.entry:hover .entry-actions,\n.entry:focus-within .entry-actions { opacity: 1; }\n\n.icon-btn {\n  border: none;\n  background: none;\n  color: var(--ink-faint);\n  width: 24px;\n  height: 24px;\n  border-radius: 6px;\n  display: inline-flex;\n  align-items: center;\n  justify-content: center;\n}\n.icon-btn:hover { background: var(--accent-soft); color: var(--accent-strong); }\n.icon-btn[data-action=\"delete\"]:hover { background: var(--surface-2); color: var(--danger); }\n.icon-btn svg { width: 14px; height: 14px; }\n\n.entry.editing {\n  background: var(--surface-2);\n  border-radius: 12px;\n  padding-left: 10px;\n  padding-right: 10px;\n}\n.entry.editing .field-grid { margin-top: 4px; }\n\n.empty-note {\n  text-align: center;\n  color: var(--ink-faint);\n  font-size: 14px;\n  padding: 60px 20px;\n}\n\n.pagination {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  flex-wrap: wrap;\n  gap: 10px;\n  margin: 22px 0;\n  padding-bottom: 18px;\n  border-bottom: 1px solid var(--line);\n}\n\n.page-numbers {\n  display: flex;\n  flex-wrap: wrap;\n  gap: 6px;\n}\n\n.page-num {\n  font-family: 'IBM Plex Mono', ui-monospace, monospace;\n  font-size: 13px;\n  font-weight: 600;\n  color: var(--ink-soft);\n  background: var(--surface-2);\n  border: none;\n  border-radius: 8px;\n  min-width: 34px;\n  height: 34px;\n  padding: 0 6px;\n}\n.page-num:hover { background: var(--line); }\n.page-num.active {\n  background: var(--accent);\n  color: #fff;\n}\n\n.print-list { display: none; }\n\n.save-flag {\n  position: fixed;\n  bottom: 20px;\n  left: 50%;\n  transform: translateX(-50%) translateY(10px);\n  background: var(--ink);\n  color: var(--bg);\n  font-size: 13px;\n  padding: 9px 16px;\n  border-radius: 999px;\n  opacity: 0;\n  pointer-events: none;\n  transition: opacity 0.2s ease, transform 0.2s ease;\n  z-index: 10;\n}\n.save-flag.show {\n  opacity: 1;\n  transform: translateX(-50%) translateY(0);\n}\n\n.hint-typo {\n  color: var(--highlight);\n}\n\nfooter.foot {\n  margin-top: 40px;\n  color: var(--ink-faint);\n  font-size: 12.5px;\n  text-align: center;\n  line-height: 1.7;\n}\n\n@media (max-width: 520px) {\n  .entry { grid-template-columns: 30px 1fr; }\n  .field-grid { grid-template-columns: 1fr; }\n}\n\n@media (prefers-reduced-motion: reduce) {\n  * { transition: none !important; }\n}\n\n@media print {\n  @page { size: A4; margin: 12mm 11mm; }\n\n  html, body { background: #fff !important; }\n  body { color: #111 !important; }\n\n  header.top, .save-flag, footer.foot, .entry, .empty-note, .pagination, main#list { display: none !important; }\n\n  .wrap { max-width: 100%; margin: 0; padding: 0; }\n\n  #print-list {\n    display: block;\n    margin-top: 0;\n  }\n\n  /* number | word+sentence (top row) / meaning+translation (bottom row) \u2014 a\n     divider line only between entries, no internal lines within a card */\n  .print-card {\n    display: grid;\n    grid-template-columns: calc(30px + 1cm) 150px 1fr;\n    grid-template-rows: auto auto;\n    column-gap: 18px;\n    border-bottom: 1px solid #cfcfcf;\n    /* 10 cards + a page-number footer per A4 page:\n       (297mm - 24mm margin - ~13mm footer) / 10 \u2248 26mm */\n    min-height: 26mm;\n  }\n\n  .print-page-footer {\n    text-align: center;\n    font-family: 'IBM Plex Mono', ui-monospace, monospace;\n    font-size: 11px;\n    color: #888;\n    padding-top: 5mm;\n  }\n  .print-page-footer:not(:last-child) { break-after: page; page-break-after: always; }\n\n  .pc-num {\n    grid-column: 1; grid-row: 1 / 3;\n    display: flex; align-items: flex-start; justify-content: center;\n    margin-left: 1cm;\n    padding-top: 5px;\n    color: #1d4ed8 !important;\n    font-family: 'IBM Plex Mono', ui-monospace, monospace;\n    font-size: 12px; font-weight: 700;\n  }\n\n  .pc-word {\n    grid-column: 2; grid-row: 1;\n    display: flex; align-items: center; gap: 5px;\n    padding: 5px 6px;\n  }\n  .pc-emoji { font-size: 19px; line-height: 1; }\n  .pc-headword {\n    font-family: 'Fraunces', Georgia, serif;\n    font-weight: 700;\n    font-size: 18.5px;\n    color: #000 !important;\n  }\n\n  .pc-sentence {\n    grid-column: 3; grid-row: 1;\n    padding: 5px 8px;\n    font-weight: 700;\n    font-size: 16.5px;\n    color: #111 !important;\n    line-height: 1.35;\n  }\n  .pc-sentence .hl {\n    color: #b3261e !important;\n    text-decoration: underline;\n    text-decoration-thickness: 1.4px;\n  }\n\n  .pc-meaning {\n    grid-column: 2; grid-row: 2;\n    padding: 4px 6px;\n    font-size: 11px;\n    color: #333 !important;\n    white-space: pre-line;\n    line-height: 1.35;\n  }\n\n  .pc-translation {\n    grid-column: 3; grid-row: 2;\n    padding: 4px 8px;\n    font-size: 14px;\n    color: #333 !important;\n    line-height: 1.35;\n  }\n\n  .pc-blank {\n    display: inline-block;\n    width: 100%;\n    min-width: 60px;\n    height: 1em;\n    border-bottom: 1px solid #e2e2e2;\n  }\n\n  a[href]:after { content: \"\"; }\n}\n\n\n</style>";
+const BODY_SHELL_HTML = "<div class=\"wrap\">\n  <header class=\"top\">\n    <p class=\"eyebrow\">\ucd08\uae09 \uc601\ub2e8\uc5b4 1200 [\uc2e4\ub825] \u00b7 001&ndash;</p>\n    <h1>\ub2e8\uc5b4\uc640 \ubb38\uc7a5 \ub178\ud2b8</h1>\n    <p class=\"sub\">\ub2e8\uc5b4\ub97c \ubb38\uc7a5 \uc18d\uc5d0 \ub123\uc5b4 \uc678\uc6b0\ub294 \ub178\ud2b8\uc608\uc694. \ubb38\uc7a5\uc5d0 \ub4f1\uc7a5\ud558\ub294 \ud65c\uc6a9\ud615(\uacfc\uac70\ud615\u00b7\ubcf5\uc218\ud615 \ub4f1)\uc740 \uc790\ub3d9\uc73c\ub85c \ube68\uac04\uc0c9\uc73c\ub85c \ud45c\uc2dc\ub3fc\uc694. \ub73b\uacfc \ud574\uc11d\uc740 \uae30\ubcf8\uc801\uc73c\ub85c \uac00\ub824\uc838 \uc788\uc73c\ub2c8 \uc2a4\uc2a4\ub85c \ub5a0\uc62c\ub824\ubcf8 \ub4a4 \"\ud83d\udc41\ufe0f \ub73b \ubcf4\uae30\"\ub97c \ub20c\ub7ec \ud655\uc778\ud558\uc138\uc694. \uc2a4\ud53c\ucee4 \uc544\uc774\ucf58\uc744 \ub204\ub974\uba74 \uc601\uc5b4 \ubc1c\uc74c\uc744 \ub4e4\uc744 \uc218 \uc788\uace0, \uc5f0\ud544 \uc544\uc774\ucf58\uc73c\ub85c \ubc14\ub85c \uace0\uce60 \uc218 \uc788\uc5b4\uc694.</p>\n    <div class=\"toolbar\">\n      <div class=\"search-box\">\n        <svg viewBox=\"0 0 20 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.8\"><circle cx=\"9\" cy=\"9\" r=\"6.5\"></circle><path d=\"M17.5 17.5L13.5 13.5\" stroke-linecap=\"round\"></path></svg>\n        <input id=\"search\" type=\"text\" placeholder=\"\ub2e8\uc5b4 \ub610\ub294 \ub73b \uac80\uc0c9\" autocomplete=\"off\">\n      </div>\n      <span class=\"count-pill\" id=\"count-pill\">0\uac1c</span>\n      <button class=\"btn secondary\" id=\"toggle-study-mode\">\ud83d\ude48 \ub73b \uac00\ub9ac\uae30: \ucf1c\uc9d0</button>\n      <button class=\"btn secondary\" id=\"toggle-voice\">\ud83d\udd0a \ubc1c\uc74c \uc124\uc815</button>\n      <button class=\"btn secondary\" id=\"continuous-play-btn\" title=\"\uc9c0\uae08 \ubcf4\uc774\ub294 Day\uc758 \uc608\ubb38 \ubc1c\uc74c\uc744 \uc21c\uc11c\ub300\ub85c \uc774\uc5b4 \uc7ac\uc0dd\ud574\uc694\">\u25b6\ufe0f \uc608\ubb38 \uc5f0\uc18d\uc7ac\uc0dd</button>\n      <span class=\"play-status\" id=\"play-status\" hidden></span>\n      <button class=\"btn secondary\" id=\"print-btn\" title=\"\uac80\uc0c9\uc73c\ub85c \ubaa9\ub85d\uc744 \uc881\ud78c \uc0c1\ud0dc\ub77c\uba74 \uadf8 \ubaa9\ub85d\ub9cc \uc778\uc1c4\ub3fc\uc694\">\ud83d\udda8\ufe0f \uc778\uc1c4 (A4)</button>\n      <button class=\"btn\" id=\"toggle-add\">+ \ub2e8\uc5b4 \ucd94\uac00</button>\n    </div>\n    <div class=\"voice-panel\" id=\"voice-panel\">\n      <h2>\ubc1c\uc74c\uc5d0 \uc0ac\uc6a9\ud560 \uc74c\uc131 \uace0\ub974\uae30</h2>\n      <p class=\"voice-note\">\uc774 \ud398\uc774\uc9c0\ub294 \ube0c\ub77c\uc6b0\uc800\uc5d0 \uc774\ubbf8 \uc124\uce58\ub41c \uc74c\uc131\uc73c\ub85c \uc18c\ub9ac\ub97c \ub0c5\ub2c8\ub2e4. \ubcf4\uc548 \uc815\ucc45\uc0c1 \uc774 \ud398\uc774\uc9c0\uac00 \ub124\uc774\ubc84\u00b7\uad6c\uae00 \ubc88\uc5ed\u00b7\uc625\uc2a4\ud37c\ub4dc \uac19\uc740 \uc678\ubd80 \uc0ac\uc774\ud2b8\uc758 \uc624\ub514\uc624\ub97c \uc2e4\uc2dc\uac04\uc73c\ub85c \ubd88\ub7ec\uc624\ub294 \uac83\uc740 \ub9c9\ud600 \uc788\uace0, \uadf8 \uc0ac\uc774\ud2b8\ub4e4\uc758 \ub179\uc74c \uc74c\uc6d0\uc744 \uadf8\ub300\ub85c \uc800\uc7a5\ud574 \ubc30\ud3ec\ud558\ub294 \uac83\ub3c4 \uc800\uc791\uad8c\uc0c1 \uc5b4\ub835\uc2b5\ub2c8\ub2e4. \ub300\uc2e0 \ub370\uc2a4\ud06c\ud1b1 \ud06c\ub86c(Chrome)\uc5d0\ub294 \uad6c\uae00 \ubc88\uc5ed\uacfc \uac19\uc740 \uc5d4\uc9c4\uc758 <b>\"Google US English\"</b> \uc74c\uc131\uc774 \uae30\ubcf8\uc73c\ub85c \ub4e4\uc5b4\uc788\ub294 \uacbd\uc6b0\uac00 \ub9ce\uc544\uc694 \u2014 \uc544\ub798 \ubaa9\ub85d\uc5d0 \uc788\ub2e4\uba74 \uadf8 \uc74c\uc131\uc744 \uc120\ud0dd\ud558\uba74 \uad6c\uae00 \ubc88\uc5ed\uacfc \uac00\uc7a5 \ube44\uc2b7\ud55c \ubc1c\uc74c\uc744 \ub4e4\uc744 \uc218 \uc788\uc2b5\ub2c8\ub2e4. \uc5c6\ub2e4\uba74 Mac Safari\uc758 \"Ava\"\u00b7\"Samantha\", Edge\uc758 \"Online (Natural)\" \uacc4\uc5f4\ub3c4 \uc790\uc5f0\uc2a4\ub7ec\uc6b4 \ud3b8\uc774\uc5d0\uc694.</p>\n      <div class=\"voice-row\">\n        <select id=\"voice-select\"></select>\n        <select id=\"rate-select\">\n          <option value=\"0.6\">0.6\ubc30\uc18d</option>\n          <option value=\"0.7\">0.7\ubc30\uc18d</option>\n          <option value=\"0.8\">0.8\ubc30\uc18d</option>\n          <option value=\"0.9\" selected>0.9\ubc30\uc18d</option>\n          <option value=\"1\">1.0\ubc30\uc18d (\uae30\ubcf8)</option>\n          <option value=\"1.1\">1.1\ubc30\uc18d</option>\n          <option value=\"1.2\">1.2\ubc30\uc18d</option>\n        </select>\n        <button class=\"btn secondary\" id=\"voice-preview\">\ubbf8\ub9ac\ub4e3\uae30</button>\n      </div>\n    </div>\n    <div class=\"add-panel\" id=\"add-panel\">\n      <h2>\uc0c8 \ub2e8\uc5b4 \ucd94\uac00</h2>\n      <div class=\"field-grid\">\n        <div class=\"field\">\n          <label for=\"in-word\">\ub2e8\uc5b4 (\uc601\uc5b4)</label>\n          <input id=\"in-word\" type=\"text\" placeholder=\"\uc608: study\">\n        </div>\n        <div class=\"field\">\n          <label for=\"in-meaning\">\ud488\uc0ac \u00b7 \ub73b</label>\n          <input id=\"in-meaning\" type=\"text\" placeholder=\"\uc608: \ub3d9. \uacf5\ubd80\ud558\ub2e4\">\n        </div>\n        <div class=\"field full\">\n          <label for=\"in-sentence\">\uc608\ubb38 (\uc601\uc5b4)</label>\n          <input id=\"in-sentence\" type=\"text\" placeholder=\"\uc608: She studies English every day.\">\n        </div>\n        <div class=\"field full\">\n          <label for=\"in-translation\">\uc608\ubb38 \ud574\uc11d (\ud55c\uad6d\uc5b4)</label>\n          <input id=\"in-translation\" type=\"text\" placeholder=\"\uc608: \uadf8\ub140\ub294 \ub9e4\uc77c \uc601\uc5b4\ub97c \uacf5\ubd80\ud55c\ub2e4.\">\n        </div>\n      </div>\n      <div class=\"add-actions\">\n        <button class=\"btn secondary\" id=\"cancel-add\">\ucde8\uc18c</button>\n        <button class=\"btn\" id=\"submit-add\">\ucd94\uac00\ud558\uae30</button>\n      </div>\n    </div>\n  </header>\n\n  <nav class=\"pagination\" id=\"pagination\">\n    <button class=\"btn secondary\" id=\"page-prev\">\u2039 \uc774\uc804</button>\n    <span class=\"page-numbers\" id=\"page-numbers\"></span>\n    <button class=\"btn secondary\" id=\"page-next\">\ub2e4\uc74c \u203a</button>\n  </nav>\n\n  <main id=\"list\"></main>\n\n  <div id=\"print-list\" class=\"print-list\"></div>\n\n  <footer class=\"foot\">\n    \ud65c\uc6a9\ud615 \uc790\ub3d9 \uac15\uc870\ub294 \uaddc\uce59 \ubcc0\ud654(-s, -ed, -ing \ub4f1)\uc640 \uc790\uc8fc \uc4f0\uc774\ub294 \ubd88\uaddc\uce59 \ub3d9\uc0ac\u00b7\uba85\uc0ac\ub97c \ud568\uaed8 \uc778\uc2dd\ud574\uc694. \uc544\uc8fc \ub4dc\ubb38 \ud615\ud0dc\ub294 \ub193\uce60 \uc218 \uc788\uc73c\ub2c8 \uadf8\ub7f4 \ub550 \ubb38\uc7a5\uc744 \ud074\ub9ad\ud574\uc11c \uc9c1\uc811 \uace0\uccd0 \uc8fc\uc138\uc694.<br>\n    \uc778\uc1c4 \uc2dc \ub2e8\uc5b4 \uc606 \uadf8\ub9bc\uc740 \uc2e4\uc81c \uc0bd\ud654\uac00 \uc544\ub2c8\ub77c \ub73b\uc744 \ub5a0\uc62c\ub9ac\uae30 \uc27d\uac8c \ubd99\uc778 \uac04\ub2e8\ud55c \uc774\ubaa8\uc9c0 \uc544\uc774\ucf58\uc774\uc5d0\uc694.\n  </footer>\n</div>\n\n<div class=\"save-flag\" id=\"save-flag\">\uc800\uc7a5\ub428</div>\n";
+const ENGINE_JS = "const IRREGULAR_VERBS = {\"arise\": [\"arisen\", \"arises\", \"arising\", \"arose\"], \"awake\": [\"awakes\", \"awaking\", \"awoke\", \"awoken\"], \"be\": [\"am\", \"are\", \"been\", \"being\", \"is\", \"was\", \"were\"], \"bear\": [\"bearing\", \"bears\", \"bore\", \"born\", \"borne\"], \"beat\": [\"beaten\", \"beating\", \"beats\"], \"become\": [\"became\", \"becomes\", \"becoming\"], \"begin\": [\"began\", \"beginning\", \"begins\", \"begun\"], \"bend\": [\"bended\", \"bending\", \"bends\", \"bent\"], \"bet\": [\"bets\", \"betted\", \"betting\"], \"bind\": [\"binding\", \"binds\", \"bound\"], \"bite\": [\"bit\", \"bites\", \"biting\", \"bitten\"], \"bleed\": [\"bled\", \"bleeding\", \"bleeds\"], \"blow\": [\"blew\", \"blowing\", \"blown\", \"blows\"], \"break\": [\"breaking\", \"breaks\", \"broke\", \"broken\"], \"breed\": [\"bred\", \"breeding\", \"breeds\"], \"bring\": [\"bringing\", \"brings\", \"brought\"], \"broadcast\": [\"broadcasted\", \"broadcasting\", \"broadcasts\"], \"build\": [\"building\", \"builds\", \"built\"], \"burn\": [\"burned\", \"burning\", \"burns\", \"burnt\"], \"burst\": [\"bursting\", \"bursts\"], \"buy\": [\"bought\", \"buying\", \"buys\"], \"cast\": [\"casting\", \"casts\"], \"catch\": [\"catches\", \"catching\", \"caught\"], \"choose\": [\"chooses\", \"choosing\", \"chose\", \"chosen\"], \"cling\": [\"clinging\", \"clings\", \"clung\"], \"come\": [\"came\", \"comes\", \"coming\"], \"cost\": [\"costed\", \"costing\", \"costs\"], \"creep\": [\"creeping\", \"creeps\", \"crept\"], \"cut\": [\"cuts\", \"cutting\"], \"deal\": [\"dealing\", \"deals\", \"dealt\"], \"dig\": [\"digging\", \"digs\", \"dug\"], \"dive\": [\"dived\", \"dives\", \"diving\", \"dove\"], \"do\": [\"did\", \"does\", \"doing\", \"done\"], \"draw\": [\"drawing\", \"drawn\", \"draws\", \"drew\"], \"dream\": [\"dreamed\", \"dreaming\", \"dreams\", \"dreamt\"], \"drink\": [\"drank\", \"drinking\", \"drinks\", \"drunk\"], \"drive\": [\"driven\", \"drives\", \"driving\", \"drove\"], \"dwell\": [\"dwelled\", \"dwelling\", \"dwells\", \"dwelt\"], \"eat\": [\"ate\", \"eaten\", \"eating\", \"eats\"], \"fall\": [\"fallen\", \"falling\", \"falls\", \"fell\"], \"feed\": [\"fed\", \"feeding\", \"feeds\"], \"feel\": [\"feeling\", \"feels\", \"felt\"], \"fight\": [\"fighting\", \"fights\", \"fought\"], \"find\": [\"finding\", \"finds\", \"found\"], \"fit\": [\"fits\", \"fitted\", \"fitting\"], \"flee\": [\"fled\", \"fleeing\", \"flees\"], \"fling\": [\"flinging\", \"flings\", \"flung\"], \"fly\": [\"flew\", \"flied\", \"flies\", \"flown\", \"flying\"], \"forbid\": [\"forbad\", \"forbade\", \"forbidden\", \"forbidding\", \"forbids\"], \"forecast\": [\"forecasted\", \"forecasting\", \"forecasts\"], \"forget\": [\"forgets\", \"forgetting\", \"forgot\", \"forgotten\"], \"forgive\": [\"forgave\", \"forgiven\", \"forgives\", \"forgiving\"], \"forsake\": [\"forsaken\", \"forsakes\", \"forsaking\", \"forsook\"], \"freeze\": [\"freezes\", \"freezing\", \"froze\", \"frozen\"], \"get\": [\"gets\", \"getting\", \"got\", \"gotten\"], \"give\": [\"gave\", \"given\", \"gives\", \"giving\"], \"go\": [\"goes\", \"going\", \"gone\", \"went\"], \"grind\": [\"grinded\", \"grinding\", \"grinds\", \"ground\"], \"grow\": [\"grew\", \"growing\", \"grown\", \"grows\"], \"hang\": [\"hanged\", \"hanging\", \"hangs\", \"hung\"], \"have\": [\"had\", \"has\", \"having\"], \"hear\": [\"heard\", \"hearing\", \"hears\"], \"hide\": [\"hid\", \"hidden\", \"hides\", \"hiding\"], \"hit\": [\"hits\", \"hitting\"], \"hold\": [\"held\", \"holding\", \"holds\"], \"hurt\": [\"hurting\", \"hurts\"], \"keep\": [\"keeping\", \"keeps\", \"kept\"], \"kneel\": [\"kneeled\", \"kneeling\", \"kneels\", \"knelt\"], \"knit\": [\"knits\", \"knitting\"], \"know\": [\"knew\", \"knowing\", \"known\", \"knows\"], \"lay\": [\"laid\", \"laying\", \"lays\"], \"lead\": [\"leading\", \"leads\", \"led\"], \"lean\": [\"leaned\", \"leaning\", \"leans\", \"leant\"], \"leap\": [\"leaping\", \"leaps\", \"leapt\"], \"learn\": [\"learned\", \"learning\", \"learns\", \"learnt\"], \"leave\": [\"leaves\", \"leaving\", \"left\"], \"lend\": [\"lending\", \"lends\", \"lent\"], \"let\": [\"lets\", \"letting\"], \"lie\": [\"lay\", \"lied\", \"lies\", \"lying\"], \"light\": [\"lighted\", \"lighting\", \"lights\", \"lit\"], \"lose\": [\"loses\", \"losing\", \"lost\"], \"make\": [\"made\", \"makes\", \"making\"], \"mean\": [\"meaning\", \"means\", \"meant\"], \"meet\": [\"meeting\", \"meets\", \"met\"], \"mow\": [\"mowed\", \"mowing\", \"mown\", \"mows\"], \"pay\": [\"paid\", \"payed\", \"paying\", \"pays\"], \"plead\": [\"pleaded\", \"pleading\", \"pleads\", \"pled\"], \"prove\": [\"proved\", \"proves\", \"proving\"], \"put\": [\"puts\", \"putting\"], \"quit\": [\"quits\", \"quitted\", \"quitting\"], \"read\": [\"reading\", \"reads\"], \"rid\": [\"ridded\", \"ridding\", \"rids\"], \"ride\": [\"ridden\", \"rides\", \"riding\", \"rode\"], \"ring\": [\"rang\", \"ringing\", \"rings\", \"rung\"], \"rise\": [\"risen\", \"rises\", \"rising\", \"rose\"], \"run\": [\"ran\", \"running\", \"runs\"], \"saw\": [\"sawed\", \"sawing\", \"sawn\", \"saws\"], \"say\": [\"said\", \"saying\", \"says\"], \"see\": [\"saw\", \"seeing\", \"seen\", \"sees\"], \"seek\": [\"seeking\", \"seeks\", \"sought\"], \"sell\": [\"selling\", \"sells\", \"sold\"], \"send\": [\"sending\", \"sends\", \"sent\"], \"set\": [\"sets\", \"setting\"], \"sew\": [\"sewed\", \"sewing\", \"sewn\", \"sews\"], \"shake\": [\"shaken\", \"shakes\", \"shaking\", \"shook\"], \"shave\": [\"shaved\", \"shaves\", \"shaving\"], \"shear\": [\"sheared\", \"shearing\", \"shears\", \"shorn\"], \"shed\": [\"shedding\", \"sheds\"], \"shine\": [\"shined\", \"shines\", \"shining\", \"shone\"], \"shoot\": [\"shooting\", \"shoots\", \"shot\"], \"show\": [\"showed\", \"showing\", \"shown\", \"shows\"], \"shrink\": [\"shrank\", \"shrinking\", \"shrinks\", \"shrunk\", \"shrunken\"], \"shut\": [\"shuts\", \"shutting\"], \"sing\": [\"sang\", \"singing\", \"sings\", \"sung\"], \"sink\": [\"sank\", \"sinking\", \"sinks\", \"sunk\"], \"sit\": [\"sat\", \"sits\", \"sitting\"], \"slay\": [\"slain\", \"slaying\", \"slays\", \"slew\"], \"sleep\": [\"sleeping\", \"sleeps\", \"slept\"], \"slide\": [\"slid\", \"slides\", \"sliding\"], \"sling\": [\"slinging\", \"slings\", \"slung\"], \"slit\": [\"slits\", \"slitting\"], \"smell\": [\"smelled\", \"smelling\", \"smells\", \"smelt\"], \"sow\": [\"sowed\", \"sowing\", \"sown\", \"sows\"], \"speak\": [\"speaking\", \"speaks\", \"spoke\", \"spoken\"], \"speed\": [\"sped\", \"speeded\", \"speeding\", \"speeds\"], \"spell\": [\"spelled\", \"spelling\", \"spells\", \"spelt\"], \"spend\": [\"spending\", \"spends\", \"spent\"], \"spill\": [\"spilled\", \"spilling\", \"spills\", \"spilt\"], \"spin\": [\"spinning\", \"spins\", \"spun\"], \"spit\": [\"spat\", \"spits\", \"spitted\", \"spitting\"], \"split\": [\"splits\", \"splitting\"], \"spoil\": [\"spoiled\", \"spoiling\", \"spoils\", \"spoilt\"], \"spread\": [\"spreading\", \"spreads\"], \"spring\": [\"sprang\", \"springing\", \"springs\", \"sprung\"], \"stand\": [\"standing\", \"stands\", \"stood\"], \"steal\": [\"stealing\", \"steals\", \"stole\", \"stolen\"], \"stick\": [\"sticking\", \"sticks\", \"stuck\"], \"sting\": [\"stings\", \"stung\"], \"stink\": [\"stank\", \"stinking\", \"stinks\", \"stunk\"], \"stride\": [\"stridden\", \"strides\", \"striding\", \"strode\"], \"strike\": [\"stricken\", \"strikes\", \"striking\", \"struck\"], \"string\": [\"stringing\", \"strings\", \"strung\"], \"strive\": [\"strived\", \"striven\", \"strives\", \"striving\", \"strove\"], \"swear\": [\"swearing\", \"swears\", \"swore\", \"sworn\"], \"sweep\": [\"sweeping\", \"sweeps\", \"swept\"], \"swell\": [\"swelled\", \"swelling\", \"swells\", \"swollen\"], \"swim\": [\"swam\", \"swimming\", \"swims\", \"swum\"], \"swing\": [\"swinging\", \"swings\", \"swung\"], \"take\": [\"taken\", \"takes\", \"taking\", \"took\"], \"teach\": [\"taught\", \"teaches\", \"teaching\"], \"tear\": [\"teared\", \"tearing\", \"tears\", \"tore\", \"torn\"], \"tell\": [\"telling\", \"tells\", \"told\"], \"think\": [\"thinking\", \"thinks\", \"thought\"], \"throw\": [\"threw\", \"throwing\", \"thrown\", \"throws\"], \"thrust\": [\"thrusting\", \"thrusts\"], \"tread\": [\"treading\", \"treads\", \"trod\", \"trodden\"], \"understand\": [\"understanding\", \"understands\", \"understood\"], \"undo\": [\"undid\", \"undoes\", \"undoing\", \"undone\"], \"upset\": [\"upsets\", \"upsetting\"], \"wake\": [\"waked\", \"wakes\", \"waking\", \"woke\", \"woken\"], \"wear\": [\"wearing\", \"wears\", \"wore\", \"worn\"], \"weave\": [\"weaved\", \"weaves\", \"weaving\", \"wove\", \"woven\"], \"weep\": [\"weeping\", \"weeps\", \"wept\"], \"wet\": [\"wets\", \"wetted\", \"wetting\"], \"win\": [\"winning\", \"wins\", \"won\"], \"wind\": [\"winded\", \"winding\", \"winds\", \"wound\"], \"withdraw\": [\"withdrawing\", \"withdrawn\", \"withdraws\", \"withdrew\"], \"wring\": [\"wringing\", \"wrings\", \"wrung\"], \"write\": [\"writes\", \"writing\", \"written\", \"wrote\"]};\nconst IRREGULAR_NOUNS = {\"child\": [\"children\"], \"man\": [\"men\"], \"woman\": [\"women\"], \"person\": [\"people\"], \"foot\": [\"feet\"], \"tooth\": [\"teeth\"], \"mouse\": [\"mice\"], \"goose\": [\"geese\"], \"leaf\": [\"leafs\", \"leaves\"], \"knife\": [\"knives\"], \"life\": [\"lives\"], \"wife\": [\"wives\"], \"half\": [\"halfs\", \"halves\"], \"wolf\": [\"wolves\"], \"shelf\": [\"shelves\"], \"calf\": [\"calves\"], \"loaf\": [\"loaves\"], \"thief\": [\"thieves\"], \"elf\": [\"elves\"], \"scarf\": [\"scarfs\", \"scarves\"], \"potato\": [\"potatoes\"], \"tomato\": [\"tomatoes\"], \"hero\": [\"heroes\"], \"echo\": [\"echoes\", \"echos\"], \"cactus\": [\"cacti\", \"cactuses\"], \"focus\": [\"foci\", \"focuses\"], \"fungus\": [\"fungi\", \"funguses\"], \"nucleus\": [\"nuclei\", \"nucleuses\"], \"syllabus\": [\"syllabi\", \"syllabuses\"], \"analysis\": [\"analyses\"], \"axis\": [\"axes\", \"axises\"], \"basis\": [\"bases\"], \"crisis\": [\"crises\"], \"diagnosis\": [\"diagnoses\"], \"ellipsis\": [\"ellipses\"], \"hypothesis\": [\"hypotheses\"], \"oasis\": [\"oases\"], \"paralysis\": [\"paralyses\"], \"thesis\": [\"theses\"], \"phenomenon\": [\"phenomena\", \"phenomenons\"], \"criterion\": [\"criteria\", \"criterions\"], \"datum\": [\"data\", \"datums\"], \"curriculum\": [\"curricula\", \"curriculums\"], \"memorandum\": [\"memoranda\", \"memorandums\"], \"medium\": [\"media\", \"mediums\"], \"bacterium\": [\"bacteria\"], \"index\": [\"indexes\", \"indices\"], \"matrix\": [\"matrices\", \"matrixes\"], \"vertex\": [\"vertexes\", \"vertices\"], \"appendix\": [\"appendices\", \"appendixes\"], \"fish\": [\"fishes\"]};\n// ---- word inflection + sentence highlighting engine ----\n\nfunction isVowelChar(ch) {\n  return /[aeiou]/i.test(ch);\n}\n\nfunction buildForms(word) {\n  var forms = {};\n  forms[word] = true;\n  var lw = word.toLowerCase();\n\n  var irr = IRREGULAR_VERBS[lw] || IRREGULAR_NOUNS[lw];\n  if (irr) {\n    for (var i = 0; i < irr.length; i++) forms[irr[i]] = true;\n  }\n\n  var last = word.slice(-1);\n  var secondLast = word.length > 1 ? word[word.length - 2] : '';\n  var thirdLast = word.length > 2 ? word[word.length - 3] : '';\n\n  // plural / 3rd person singular\n  if (/y$/i.test(word) && word.length > 1 && !isVowelChar(secondLast)) {\n    forms[word.slice(0, -1) + 'ies'] = true;\n  } else if (/[sxz]$/i.test(word) || /(ch|sh)$/i.test(word) || /o$/i.test(word)) {\n    forms[word + 'es'] = true;\n  } else {\n    forms[word + 's'] = true;\n  }\n\n  // past tense / past participle\n  if (/e$/i.test(word)) {\n    forms[word + 'd'] = true;\n  } else if (/y$/i.test(word) && word.length > 1 && !isVowelChar(secondLast)) {\n    forms[word.slice(0, -1) + 'ied'] = true;\n  } else {\n    forms[word + 'ed'] = true;\n    if (word.length >= 3 && !isVowelChar(last) && isVowelChar(secondLast) && !isVowelChar(thirdLast)) {\n      forms[word + last + 'ed'] = true;\n      forms[word + last + 'ing'] = true;\n    }\n  }\n\n  // -ing form\n  if (/e$/i.test(word) && !/(ee|ye|oe)$/i.test(word)) {\n    forms[word.slice(0, -1) + 'ing'] = true;\n  } else {\n    forms[word + 'ing'] = true;\n  }\n\n  // comparative / superlative\n  if (/y$/i.test(word) && word.length > 1 && !isVowelChar(secondLast)) {\n    forms[word.slice(0, -1) + 'ier'] = true;\n    forms[word.slice(0, -1) + 'iest'] = true;\n  } else if (/e$/i.test(word)) {\n    forms[word + 'r'] = true;\n    forms[word + 'st'] = true;\n  } else {\n    forms[word + 'er'] = true;\n    forms[word + 'est'] = true;\n  }\n\n  return Object.keys(forms).sort(function (a, b) { return b.length - a.length; });\n}\n\nfunction escapeRegExp(s) {\n  return s.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&');\n}\n\nfunction escapeHtml(s) {\n  return String(s == null ? '' : s)\n    .replace(/&/g, '&amp;')\n    .replace(/</g, '&lt;')\n    .replace(/>/g, '&gt;')\n    .replace(/\"/g, '&quot;')\n    .replace(/'/g, '&#39;');\n}\n\nfunction findMatchSpans(word, sentence) {\n  if (!word || !sentence) return [];\n  var forms = buildForms(word.trim());\n  var spans = [];\n  for (var i = 0; i < forms.length; i++) {\n    var f = forms[i];\n    if (!f) continue;\n    var re = new RegExp('(?<![A-Za-z])' + escapeRegExp(f) + '(?![A-Za-z])', 'gi');\n    var m;\n    while ((m = re.exec(sentence))) {\n      spans.push([m.index, m.index + f.length]);\n      if (m.index === re.lastIndex) re.lastIndex++;\n    }\n  }\n  spans.sort(function (a, b) { return (b[1] - b[0]) - (a[1] - a[0]) || a[0] - b[0]; });\n  var used = new Array(sentence.length).fill(false);\n  var kept = [];\n  for (var j = 0; j < spans.length; j++) {\n    var s = spans[j][0], e = spans[j][1];\n    var overlap = false;\n    for (var k = s; k < e; k++) { if (used[k]) { overlap = true; break; } }\n    if (!overlap) {\n      kept.push([s, e]);\n      for (var k2 = s; k2 < e; k2++) used[k2] = true;\n    }\n  }\n  kept.sort(function (a, b) { return a[0] - b[0]; });\n  return kept;\n}\n\nfunction highlightSentence(word, sentence) {\n  var spans = findMatchSpans(word, sentence);\n  var html = '';\n  var pos = 0;\n  for (var i = 0; i < spans.length; i++) {\n    var s = spans[i][0], e = spans[i][1];\n    html += escapeHtml(sentence.slice(pos, s));\n    html += '<span class=\"hl\">' + escapeHtml(sentence.slice(s, e)) + '</span>';\n    pos = e;\n  }\n  html += escapeHtml(sentence.slice(pos));\n  return html;\n}\n\nif (typeof module !== 'undefined') {\n  module.exports = { buildForms: buildForms, findMatchSpans: findMatchSpans, highlightSentence: highlightSentence };\n}\nvar ENTRIES = [];\n\nvar SPK_ICON = '<svg viewBox=\"0 0 20 20\" fill=\"none\"><path d=\"M3 7.5v5h3.2L11 16V4L6.2 7.5H3z\" fill=\"currentColor\"/><path d=\"M13.3 7.2a3.6 3.6 0 010 5.6\" stroke=\"currentColor\" stroke-width=\"1.4\" fill=\"none\" stroke-linecap=\"round\"/></svg>';\nvar TRASH_ICON = '<svg viewBox=\"0 0 20 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 6h12M8 6V4.5A1.5 1.5 0 019.5 3h1A1.5 1.5 0 0112 4.5V6m-6.5 0l.6 9.4A1.5 1.5 0 007.6 17h4.8a1.5 1.5 0 001.5-1.6L14.5 6\"/></svg>';\nvar EDIT_ICON = '<svg viewBox=\"0 0 20 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M12.9 3.5l3.6 3.6L6.6 16.9l-4 .5.5-4L12.9 3.5z\"/></svg>';\n\nvar editingIdx = -1;\nvar studyMode = true;\nvar revealedIdx = {};\n\nvar EMOJI_MAP = {\n  act: '\ud83c\udfad', art: '\ud83d\uddbc\ufe0f', become: '\ud83e\udd8b', bring: '\ud83c\udf81', burn: '\ud83d\udd25',\n  chopstick: '\ud83e\udd62', count: '\ud83d\udd22', die: '\ud83d\udc80', dirty: '\ud83d\udc37', drive: '\ud83d\ude97',\n  elevator: '\ud83d\uded7', every: '\ud83d\udd01', everyone: '\ud83d\udc65', few: '\ud83e\udd0f',\n  flim: '\ud83c\udfac', film: '\ud83c\udfac', free: '\ud83c\udd93', from: '\ud83d\udccd', group: '\ud83d\udc65',\n  guess: '\ud83e\udd14', guide: '\ud83e\udded', hear: '\ud83d\udc42', heart: '\u2764\ufe0f', hurry: '\ud83c\udfc3',\n  juice: '\ud83e\uddc3', keep: '\ud83e\udd32', key: '\ud83d\udd11', late: '\u23f0', lead: '\u27a1\ufe0f',\n  leave: '\ud83d\udeaa', market: '\ud83c\udfea', marry: '\ud83d\udc8d', monday: '\ud83d\udcc5', much: '\ud83d\udcc8',\n  newspaper: '\ud83d\udcf0', notebook: '\ud83d\udcd3', number: '#\ufe0f\u20e3', park: '\ud83c\udf33',\n  peace: '\u262e\ufe0f', practice: '\ud83c\udfaf', paint: '\ud83c\udfa8', read: '\ud83d\udcd6', rice: '\ud83c\udf5a',\n  she: '\ud83d\udc69', singer: '\ud83c\udfa4', snack: '\ud83c\udf7f', stop: '\ud83d\uded1', tennis: '\ud83c\udfbe',\n  touch: '\ud83d\udc46', weak: '\ud83c\udf43', wide: '\u2194\ufe0f',\n  sense: '\ud83e\udde0', look: '\ud83d\udc40', taste: '\ud83d\udc45', smell: '\ud83d\udc43', light: '\ud83d\udca1',\n  see: '\ud83d\udc41\ufe0f', bright: '\u2600\ufe0f', dark: '\ud83c\udf11', delicious: '\ud83d\ude0b', scent: '\ud83c\udf38',\n  view: '\ud83c\udfde\ufe0f', voice: '\ud83d\udde3\ufe0f', listen: '\ud83c\udfa7', sound: '\ud83d\udd0a', stare: '\ud83d\ude33',\n  loudly: '\ud83d\udce2', tickle: '\ud83e\udeb6'\n};\n\nfunction wordEmoji(word) {\n  var key = (word || '').trim().toLowerCase();\n  return EMOJI_MAP[key] || '\ud83d\udcd8';\n}\n\nfunction entryViewHTML(e, idx) {\n  var highlighted = highlightSentence(e.word, e.sentence);\n  var meaningHtml = escapeHtml(e.meaning || '');\n  var translationHtml = escapeHtml(e.translation || '');\n  var hasAnswer = !!(e.meaning || e.translation);\n  var hidden = studyMode && hasAnswer && !revealedIdx[idx];\n\n  var tagPart = '';\n  var translationPart = '';\n  if (hidden) {\n    tagPart = '<button class=\"reveal-chip\" data-action=\"reveal\" title=\"\ub73b\uacfc \ud574\uc11d \ubcf4\uae30\">\ud83d\udc41\ufe0f \ub73b \ubcf4\uae30</button>';\n  } else {\n    if (e.meaning) tagPart = '<span class=\"tag\">' + meaningHtml + '</span>';\n    if (e.translation) translationPart = '<div class=\"translation\">' + translationHtml + '</div>';\n    if (studyMode && hasAnswer) {\n      tagPart += '<button class=\"reveal-chip hide-chip\" data-action=\"reveal\" title=\"\ub73b\uacfc \ud574\uc11d \uac00\ub9ac\uae30\">\ud83d\ude48 \ub73b \uac00\ub9ac\uae30</button>';\n    }\n  }\n\n  return '' +\n    '<article class=\"entry\" data-idx=\"' + idx + '\">' +\n      '<div class=\"num\">' + (e.num != null ? e.num : '') + '</div>' +\n      '<div class=\"body\">' +\n        '<div class=\"headword-row\">' +\n          '<span class=\"headword\">' + escapeHtml(e.word) + '</span>' +\n          '<button class=\"spk\" data-action=\"speak\" data-text=\"' + escapeHtml(e.word) + '\" title=\"\ub2e8\uc5b4 \ubc1c\uc74c \ub4e3\uae30\" aria-label=\"\ub2e8\uc5b4 \ubc1c\uc74c \ub4e3\uae30\">' + SPK_ICON + '</button>' +\n          tagPart +\n        '</div>' +\n        '<div class=\"sentence-row\">' +\n          '<span class=\"sentence\">' + highlighted + '</span>' +\n          '<button class=\"spk\" data-action=\"speak\" data-text=\"' + escapeHtml(e.sentence) + '\" title=\"\ubb38\uc7a5 \ubc1c\uc74c \ub4e3\uae30\" aria-label=\"\ubb38\uc7a5 \ubc1c\uc74c \ub4e3\uae30\">' + SPK_ICON + '</button>' +\n        '</div>' +\n        translationPart +\n      '</div>' +\n      '<div class=\"entry-actions\">' +\n        '<button class=\"icon-btn\" data-action=\"edit\" title=\"\ub2e8\uc5b4\u00b7\uc608\ubb38 \uc218\uc815\" aria-label=\"\ub2e8\uc5b4\u00b7\uc608\ubb38 \uc218\uc815\">' + EDIT_ICON + '</button>' +\n        '<button class=\"icon-btn\" data-action=\"delete\" title=\"\uc0ad\uc81c\" aria-label=\"\uc0ad\uc81c\">' + TRASH_ICON + '</button>' +\n      '</div>' +\n    '</article>';\n}\n\nfunction entryEditHTML(e, idx) {\n  return '' +\n    '<article class=\"entry editing\" data-idx=\"' + idx + '\">' +\n      '<div class=\"num\">' + (e.num != null ? e.num : '') + '</div>' +\n      '<div class=\"body\">' +\n        '<div class=\"field-grid\">' +\n          '<div class=\"field\">' +\n            '<label>\ub2e8\uc5b4 (\uc601\uc5b4)</label>' +\n            '<input class=\"ed-word\" type=\"text\" value=\"' + escapeHtml(e.word) + '\">' +\n          '</div>' +\n          '<div class=\"field\">' +\n            '<label>\ud488\uc0ac \u00b7 \ub73b</label>' +\n            '<input class=\"ed-meaning\" type=\"text\" value=\"' + escapeHtml(e.meaning || '') + '\">' +\n          '</div>' +\n          '<div class=\"field full\">' +\n            '<label>\uc608\ubb38 (\uc601\uc5b4)</label>' +\n            '<input class=\"ed-sentence\" type=\"text\" value=\"' + escapeHtml(e.sentence) + '\">' +\n          '</div>' +\n          '<div class=\"field full\">' +\n            '<label>\uc608\ubb38 \ud574\uc11d (\ud55c\uad6d\uc5b4)</label>' +\n            '<input class=\"ed-translation\" type=\"text\" value=\"' + escapeHtml(e.translation || '') + '\">' +\n          '</div>' +\n        '</div>' +\n        '<div class=\"add-actions\">' +\n          '<button class=\"btn secondary\" data-action=\"cancel-edit\">\ucde8\uc18c</button>' +\n          '<button class=\"btn\" data-action=\"save-edit\">\uc800\uc7a5</button>' +\n        '</div>' +\n      '</div>' +\n    '</article>';\n}\n\nfunction entryPrintHTML(e, idx) {\n  var highlighted = highlightSentence(e.word, e.sentence);\n  // Print always shows the meaning/translation in full \u2014 the hide/reveal\n  // study-mode board is a screen-only quiz aid and is never applied to print.\n  var meaningCell = e.meaning ? escapeHtml(e.meaning) : '';\n  var translationCell = e.translation ? escapeHtml(e.translation) : '';\n  return '' +\n    '<div class=\"print-card\">' +\n      '<div class=\"pc-num\">' + (e.num != null ? e.num : '') + '</div>' +\n      '<div class=\"pc-word\">' +\n        '<span class=\"pc-emoji\" aria-hidden=\"true\">' + wordEmoji(e.word) + '</span>' +\n        '<span class=\"pc-headword\">' + escapeHtml(e.word) + '</span>' +\n      '</div>' +\n      '<div class=\"pc-sentence\">' + highlighted + '</div>' +\n      '<div class=\"pc-meaning\">' + meaningCell + '</div>' +\n      '<div class=\"pc-translation\">' + translationCell + '</div>' +\n    '</div>';\n}\n\nfunction entryCardHTML(e, idx) {\n  return (idx === editingIdx) ? entryEditHTML(e, idx) : entryViewHTML(e, idx);\n}\n\nfunction visibleEntries() {\n  var q = (document.getElementById('search').value || '').trim().toLowerCase();\n  var visible = [];\n  for (var i = 0; i < ENTRIES.length; i++) {\n    var e = ENTRIES[i];\n    if (!q ||\n        (e.word && e.word.toLowerCase().indexOf(q) !== -1) ||\n        (e.meaning && e.meaning.toLowerCase().indexOf(q) !== -1) ||\n        (e.translation && e.translation.toLowerCase().indexOf(q) !== -1) ||\n        (e.sentence && e.sentence.toLowerCase().indexOf(q) !== -1)) {\n      visible.push({ e: e, i: i });\n    }\n  }\n  return visible;\n}\n\nvar currentPage = 0;\nvar PRINT_PAGE_SIZE = 10; // cards per physical A4 sheet when printing\n\n// group visible entries by their \"day\" (Day 01, Day 02, ...) in ascending\n// day order; a day only produces a page/button when it actually has at\n// least one (visible) entry \u2014 there is no \"2\uc77c\" button until Day 2 words\n// have actually been added.\nfunction dayGroups(visible) {\n  var byDay = {};\n  var days = [];\n  for (var i = 0; i < visible.length; i++) {\n    var d = visible[i].e.day || 1;\n    if (!byDay[d]) { byDay[d] = []; days.push(d); }\n    byDay[d].push(visible[i]);\n  }\n  days.sort(function (a, b) { return a - b; });\n  return days.map(function (d) { return { day: d, items: byDay[d] }; });\n}\n\nfunction render() {\n  var q = (document.getElementById('search').value || '').trim().toLowerCase();\n  var listEl = document.getElementById('list');\n  var printListEl = document.getElementById('print-list');\n  var visible = visibleEntries();\n  document.getElementById('count-pill').textContent = ENTRIES.length + '\uac1c' + (q ? ' \uc911 ' + visible.length + '\uac1c \ud45c\uc2dc' : '');\n\n  if (visible.length === 0) {\n    listEl.innerHTML = '<p class=\"empty-note\">' + (ENTRIES.length === 0 ? '\uc544\uc9c1 \ub4f1\ub85d\ub41c \ub2e8\uc5b4\uac00 \uc5c6\uc5b4\uc694. \uc704\uc5d0\uc11c \ucd94\uac00\ud574\ubcf4\uc138\uc694.' : '\uac80\uc0c9 \uacb0\uacfc\uac00 \uc5c6\uc5b4\uc694.') + '</p>';\n    printListEl.innerHTML = '';\n    currentPage = 0;\n    updatePaginationUI([]);\n    updatePlayButtonLabel();\n    return;\n  }\n\n  // pages are grouped by \"day\" (Day 01, Day 02, ...), not by a fixed word\n  // count \u2014 a day's button only appears once that day actually has words\n  var groups = dayGroups(visible);\n  if (currentPage >= groups.length) currentPage = groups.length - 1;\n  if (currentPage < 0) currentPage = 0;\n  var pageItems = groups[currentPage] ? groups[currentPage].items : [];\n\n  var html = '';\n  for (var k = 0; k < pageItems.length; k++) {\n    html += entryCardHTML(pageItems[k].e, pageItems[k].i);\n  }\n  listEl.innerHTML = html;\n\n  // the printable document always includes every currently-visible entry,\n  // independent of which screen page is being shown (10 per printed page),\n  // with a page-number footer inserted after every 10th card so each\n  // physical A4 sheet is stamped with its own page number.\n  var printHtml = '';\n  for (var p = 0; p < visible.length; p++) {\n    printHtml += entryPrintHTML(visible[p].e, visible[p].i);\n    var isEndOfSheet = (p + 1) % PRINT_PAGE_SIZE === 0 || p === visible.length - 1;\n    if (isEndOfSheet) {\n      var sheetNum = Math.floor(p / PRINT_PAGE_SIZE) + 1;\n      printHtml += '<div class=\"print-page-footer\">' + sheetNum + '</div>';\n    }\n  }\n  printListEl.innerHTML = printHtml;\n\n  updatePaginationUI(groups);\n  if (playState.active) highlightPlayingEntry(playState.queue[playState.idx] ? playState.queue[playState.idx].i : -1);\n  updatePlayButtonLabel();\n}\n\nfunction updatePaginationUI(groups) {\n  var nav = document.getElementById('pagination');\n  var numbersEl = document.getElementById('page-numbers');\n  var prevBtn = document.getElementById('page-prev');\n  var nextBtn = document.getElementById('page-next');\n  if (!nav) return;\n  if (groups.length < 1) { nav.hidden = true; return; }\n  nav.hidden = false;\n  var html = '';\n  for (var p = 0; p < groups.length; p++) {\n    var items = groups[p].items;\n    var pageStart = items[0].e.num, pageEnd = items[items.length - 1].e.num;\n    html += '<button class=\"page-num' + (p === currentPage ? ' active' : '') + '\" data-page=\"' + p + '\" title=\"' + pageStart + '~' + pageEnd + '\">' + groups[p].day + '\uc77c</button>';\n  }\n  numbersEl.innerHTML = html;\n  prevBtn.disabled = currentPage === 0;\n  nextBtn.disabled = currentPage >= groups.length - 1;\n}\n\nfunction goToPageNum(page) {\n  stopContinuousPlay();\n  currentPage = page;\n  render();\n  var listEl = document.getElementById('list');\n  if (listEl && listEl.scrollIntoView) listEl.scrollIntoView({ behavior: 'smooth', block: 'start' });\n}\n\nfunction goToPage(delta) {\n  stopContinuousPlay();\n  currentPage += delta;\n  render();\n  var listEl = document.getElementById('list');\n  if (listEl && listEl.scrollIntoView) listEl.scrollIntoView({ behavior: 'smooth', block: 'start' });\n}\n\nvar voicesCache = [];\nvar chosenVoiceURI = null;\nvar chosenRate = 0.9;\n\nfunction loadStoredRate() {\n  var r = 0.9;\n  try {\n    var saved = localStorage.getItem('vocab_speech_rate');\n    if (saved) {\n      var n = parseFloat(saved);\n      if (!isNaN(n) && n >= 0.5 && n <= 2) r = n;\n    }\n  } catch (e) {}\n  return r;\n}\n\nfunction loadStoredStudyMode() {\n  try {\n    var saved = localStorage.getItem('vocab_study_mode');\n    if (saved === '0') return false;\n    if (saved === '1') return true;\n  } catch (e) {}\n  return true;\n}\n\nfunction scoreVoice(v) {\n  var name = (v.name || '').toLowerCase();\n  var lang = (v.lang || '').toLowerCase();\n  var score = 0;\n  if (lang.indexOf('en-us') === 0) score += 30;\n  else if (lang.indexOf('en') === 0) score += 15;\n  else score -= 100;\n  if (/google/.test(name)) score += 45;\n  if (/online|natural|neural/.test(name)) score += 25;\n  if (/premium|enhanced|plus/.test(name)) score += 15;\n  if (/samantha|ava|zoe|allison|susan|nicky|siri/.test(name)) score += 10;\n  if (v.localService === false) score += 5;\n  return score;\n}\n\nfunction loadVoices() {\n  if (!('speechSynthesis' in window)) return;\n  voicesCache = window.speechSynthesis.getVoices() || [];\n  if (!voicesCache.length) return;\n  var enVoices = voicesCache.filter(function (v) { return /^en/i.test(v.lang || ''); });\n  populateVoiceSelect(enVoices.length ? enVoices : voicesCache);\n}\n\nfunction populateVoiceSelect(list) {\n  var sel = document.getElementById('voice-select');\n  if (!sel) return;\n  var saved = null;\n  try { saved = localStorage.getItem('vocab_voice_uri'); } catch (e) {}\n  list = list.slice().sort(function (a, b) { return scoreVoice(b) - scoreVoice(a); });\n  sel.innerHTML = '';\n  list.forEach(function (v) {\n    var opt = document.createElement('option');\n    opt.value = v.voiceURI;\n    opt.textContent = v.name + ' (' + v.lang + ')';\n    sel.appendChild(opt);\n  });\n  chosenVoiceURI = (saved && list.some(function (v) { return v.voiceURI === saved; })) ? saved : (list[0] && list[0].voiceURI);\n  if (chosenVoiceURI) sel.value = chosenVoiceURI;\n}\n\nfunction buildUtterance(text) {\n  var u = new SpeechSynthesisUtterance(text);\n  var voice = null;\n  for (var i = 0; i < voicesCache.length; i++) {\n    if (voicesCache[i].voiceURI === chosenVoiceURI) { voice = voicesCache[i]; break; }\n  }\n  if (voice) { u.voice = voice; u.lang = voice.lang; } else { u.lang = 'en-US'; }\n  u.rate = chosenRate;\n  return u;\n}\n\nfunction speak(text) {\n  if (!('speechSynthesis' in window)) { alert('\uc774 \ube0c\ub77c\uc6b0\uc800\ub294 \uc74c\uc131 \uc7ac\uc0dd\uc744 \uc9c0\uc6d0\ud558\uc9c0 \uc54a\uc544\uc694.'); return; }\n  if (playState.active) stopContinuousPlay();\n  window.speechSynthesis.cancel();\n  window.speechSynthesis.speak(buildUtterance(text));\n}\n\nvar PLAY_GAP_MS = 350;\nvar playState = { active: false, queue: [], idx: -1, timer: null };\n\nfunction clearPlayingHighlight() {\n  var prev = document.querySelectorAll('.entry.playing');\n  for (var i = 0; i < prev.length; i++) prev[i].classList.remove('playing');\n}\n\nfunction highlightPlayingEntry(idx) {\n  clearPlayingHighlight();\n  var card = document.querySelector('.entry[data-idx=\"' + idx + '\"]');\n  if (card) {\n    card.classList.add('playing');\n    if (card.scrollIntoView) card.scrollIntoView({ behavior: 'smooth', block: 'center' });\n  }\n}\n\n// continuous playback always targets the entries on the CURRENT day page \u2014\n// \"\uc5f0\uc18d\uc7ac\uc0dd\" plays that day's example sentences in order\nfunction currentPageEntries() {\n  var groups = dayGroups(visibleEntries());\n  return groups[currentPage] ? groups[currentPage].items : [];\n}\n\nfunction updatePlayButtonLabel() {\n  var btn = document.getElementById('continuous-play-btn');\n  if (!btn) return;\n  var pageItems = currentPageEntries();\n  if (!pageItems.length) { btn.textContent = '\u25b6\ufe0f \uc774 \ud398\uc774\uc9c0 \uc5f0\uc18d\uc7ac\uc0dd'; btn.disabled = true; return; }\n  btn.disabled = false;\n  var startNum = pageItems[0].e.num, endNum = pageItems[pageItems.length - 1].e.num;\n  btn.textContent = '\u25b6\ufe0f ' + startNum + '~' + endNum + ' \uc5f0\uc18d\uc7ac\uc0dd';\n}\n\nfunction updatePlayStatus() {\n  var statusEl = document.getElementById('play-status');\n  var btn = document.getElementById('continuous-play-btn');\n  if (!statusEl || !btn) return;\n  if (playState.active) {\n    var item = playState.queue[playState.idx];\n    statusEl.hidden = false;\n    statusEl.textContent = (playState.idx + 1) + '/' + playState.queue.length + ' \uc7ac\uc0dd \uc911 \u00b7 ' + (item ? item.e.word : '');\n    btn.textContent = '\u23f9 \uc815\uc9c0';\n  } else {\n    statusEl.hidden = true;\n    updatePlayButtonLabel();\n  }\n}\n\nfunction playNextInQueue() {\n  if (!playState.active) return;\n  if (playState.idx >= playState.queue.length) { finishBatch(); return; }\n  var item = playState.queue[playState.idx];\n  highlightPlayingEntry(item.i);\n  updatePlayStatus();\n  var u = buildUtterance(item.e.sentence);\n  u.onend = function () {\n    if (!playState.active) return;\n    playState.idx++;\n    playState.timer = setTimeout(playNextInQueue, PLAY_GAP_MS);\n  };\n  u.onerror = u.onend;\n  window.speechSynthesis.speak(u);\n}\n\nfunction finishBatch() {\n  playState.active = false;\n  clearPlayingHighlight();\n  updatePlayStatus();\n}\n\nfunction stopContinuousPlay() {\n  if (!playState.active) return;\n  playState.active = false;\n  clearTimeout(playState.timer);\n  window.speechSynthesis.cancel();\n  clearPlayingHighlight();\n  updatePlayStatus();\n}\n\nfunction startContinuousPlay() {\n  if (!('speechSynthesis' in window)) { alert('\uc774 \ube0c\ub77c\uc6b0\uc800\ub294 \uc74c\uc131 \uc7ac\uc0dd\uc744 \uc9c0\uc6d0\ud558\uc9c0 \uc54a\uc544\uc694.'); return; }\n  var pageItems = currentPageEntries();\n  if (!pageItems.length) { alert('\uc774 \ud398\uc774\uc9c0\uc5d0 \uc7ac\uc0dd\ud560 \ub2e8\uc5b4\uac00 \uc5c6\uc5b4\uc694.'); return; }\n  window.speechSynthesis.cancel();\n  playState.queue = pageItems;\n  playState.idx = 0;\n  playState.active = true;\n  playNextInQueue();\n}\n\nfunction toggleContinuousPlay() {\n  if (playState.active) stopContinuousPlay();\n  else startContinuousPlay();\n}\n\nvar saveFlagTimer = null;\nfunction showSaved(msg) {\n  var el = document.getElementById('save-flag');\n  if (!el) return;\n  el.textContent = msg || '\uc800\uc7a5\ub428';\n  el.classList.add('show');\n  clearTimeout(saveFlagTimer);\n  saveFlagTimer = setTimeout(function () { el.classList.remove('show'); }, 1600);\n}\n\nfunction publishEntries() {\n  try { localStorage.setItem('vocab_ledger_entries', JSON.stringify(ENTRIES)); } catch (e) {}\n  if (!window.claude || typeof window.claude.use !== 'function') {\n    showSaved('\uc774 \uae30\uae30\uc5d0 \uc800\uc7a5\ub428');\n    return;\n  }\n  window.claude.use('artifact').then(function (ns) {\n    if (!ns) { showSaved('\uc774 \uae30\uae30\uc5d0 \uc800\uc7a5\ub428'); return; }\n    ns.publish(renderPage(ENTRIES)).catch(function (err) {\n      if (err && err.code === 'conflict') { return; }\n      showSaved('\uc774 \uae30\uae30\uc5d0\ub9cc \uc800\uc7a5\ub428');\n    });\n  }).catch(function () {\n    showSaved('\uc774 \uae30\uae30\uc5d0 \uc800\uc7a5\ub428');\n  });\n}\n\nfunction nextNum() {\n  var max = 0;\n  for (var i = 0; i < ENTRIES.length; i++) {\n    if (typeof ENTRIES[i].num === 'number' && ENTRIES[i].num > max) max = ENTRIES[i].num;\n  }\n  return max + 1;\n}\n\n// new words default to the latest \"day\" that already has entries (i.e.\n// they're appended to the chapter currently being built), not a new day\nfunction latestDay() {\n  var maxDay = 1;\n  for (var i = 0; i < ENTRIES.length; i++) {\n    var d = ENTRIES[i].day || 1;\n    if (d > maxDay) maxDay = d;\n  }\n  return maxDay;\n}\n\nfunction addEntry() {\n  var word = document.getElementById('in-word').value.trim();\n  var sentence = document.getElementById('in-sentence').value.trim();\n  var meaning = document.getElementById('in-meaning').value.trim();\n  var translation = document.getElementById('in-translation').value.trim();\n  if (!word || !sentence) { alert('\ub2e8\uc5b4\uc640 \uc608\ubb38\uc740 \uaf2d \uc785\ub825\ud574 \uc8fc\uc138\uc694.'); return; }\n  ENTRIES.push({ num: nextNum(), word: word, sentence: sentence, meaning: meaning, translation: translation, day: latestDay() });\n  document.getElementById('in-word').value = '';\n  document.getElementById('in-sentence').value = '';\n  document.getElementById('in-meaning').value = '';\n  document.getElementById('in-translation').value = '';\n  document.getElementById('add-panel').classList.remove('open');\n  revealedIdx = {};\n  render();\n  publishEntries();\n}\n\nfunction deleteEntry(idx) {\n  if (!confirm('\uc774 \ub2e8\uc5b4\ub97c \uc0ad\uc81c\ud560\uae4c\uc694?')) return;\n  stopContinuousPlay();\n  ENTRIES.splice(idx, 1);\n  revealedIdx = {};\n  render();\n  publishEntries();\n}\n\nfunction revealEntry(idx) {\n  revealedIdx[idx] = !revealedIdx[idx];\n  render();\n}\n\nfunction setStudyMode(on) {\n  studyMode = on;\n  revealedIdx = {};\n  try { localStorage.setItem('vocab_study_mode', on ? '1' : '0'); } catch (e) {}\n  var btn = document.getElementById('toggle-study-mode');\n  if (btn) btn.textContent = on ? '\ud83d\ude48 \ub73b \uac00\ub9ac\uae30: \ucf1c\uc9d0' : '\ud83d\udc41\ufe0f \ub73b \uac00\ub9ac\uae30: \uaebc\uc9d0';\n  render();\n}\n\nfunction startEdit(idx) {\n  editingIdx = idx;\n  render();\n  var card = document.querySelector('.entry[data-idx=\"' + idx + '\"]');\n  var input = card && card.querySelector('.ed-word');\n  if (input) { input.focus(); input.select(); }\n}\n\nfunction cancelEdit() {\n  editingIdx = -1;\n  render();\n}\n\nfunction saveEdit(idx) {\n  var card = document.querySelector('.entry[data-idx=\"' + idx + '\"]');\n  if (!card) return;\n  var word = card.querySelector('.ed-word').value.trim();\n  var sentence = card.querySelector('.ed-sentence').value.trim();\n  var meaning = card.querySelector('.ed-meaning').value.trim();\n  var translation = card.querySelector('.ed-translation').value.trim();\n  if (!word || !sentence) { alert('\ub2e8\uc5b4\uc640 \uc608\ubb38\uc740 \ube44\uc6cc\ub458 \uc218 \uc5c6\uc5b4\uc694.'); return; }\n  ENTRIES[idx].word = word;\n  ENTRIES[idx].sentence = sentence;\n  ENTRIES[idx].meaning = meaning;\n  ENTRIES[idx].translation = translation;\n  editingIdx = -1;\n  render();\n  publishEntries();\n}\n\nfunction attachHandlers() {\n  document.getElementById('search').addEventListener('input', function () {\n    stopContinuousPlay();\n    currentPage = 0;\n    render();\n  });\n\n  document.getElementById('page-prev').addEventListener('click', function () { goToPage(-1); });\n  document.getElementById('page-next').addEventListener('click', function () { goToPage(1); });\n  document.getElementById('page-numbers').addEventListener('click', function (ev) {\n    var btn = ev.target.closest('.page-num');\n    if (!btn) return;\n    goToPageNum(parseInt(btn.getAttribute('data-page'), 10));\n  });\n\n  document.getElementById('toggle-add').addEventListener('click', function () {\n    var panel = document.getElementById('add-panel');\n    panel.classList.toggle('open');\n    if (panel.classList.contains('open')) document.getElementById('in-word').focus();\n  });\n  document.getElementById('cancel-add').addEventListener('click', function () {\n    document.getElementById('add-panel').classList.remove('open');\n  });\n  document.getElementById('submit-add').addEventListener('click', addEntry);\n\n  document.getElementById('toggle-voice').addEventListener('click', function () {\n    document.getElementById('voice-panel').classList.toggle('open');\n  });\n  document.getElementById('toggle-study-mode').addEventListener('click', function () {\n    setStudyMode(!studyMode);\n  });\n  document.getElementById('continuous-play-btn').addEventListener('click', function () {\n    toggleContinuousPlay();\n  });\n  document.getElementById('print-btn').addEventListener('click', function () {\n    stopContinuousPlay();\n    document.getElementById('add-panel').classList.remove('open');\n    document.getElementById('voice-panel').classList.remove('open');\n    window.print();\n  });\n  document.getElementById('voice-select').addEventListener('change', function (ev) {\n    chosenVoiceURI = ev.target.value;\n    try { localStorage.setItem('vocab_voice_uri', chosenVoiceURI); } catch (e) {}\n  });\n  document.getElementById('rate-select').addEventListener('change', function (ev) {\n    chosenRate = parseFloat(ev.target.value) || 0.9;\n    try { localStorage.setItem('vocab_speech_rate', String(chosenRate)); } catch (e) {}\n  });\n  document.getElementById('voice-preview').addEventListener('click', function () {\n    speak('This is a test. Nice to meet you.');\n  });\n\n  var listEl = document.getElementById('list');\n\n  listEl.addEventListener('click', function (ev) {\n    var btn = ev.target.closest('[data-action]');\n    if (!btn) return;\n    var card = ev.target.closest('.entry');\n    var idx = card ? parseInt(card.getAttribute('data-idx'), 10) : -1;\n    var action = btn.getAttribute('data-action');\n    if (action === 'speak') {\n      speak(btn.getAttribute('data-text'));\n    } else if (action === 'delete') {\n      deleteEntry(idx);\n    } else if (action === 'edit') {\n      startEdit(idx);\n    } else if (action === 'save-edit') {\n      saveEdit(idx);\n    } else if (action === 'cancel-edit') {\n      cancelEdit();\n    } else if (action === 'reveal') {\n      revealEntry(idx);\n    }\n  });\n\n  listEl.addEventListener('keydown', function (ev) {\n    if (!ev.target.classList) return;\n    var isEditInput = ev.target.classList.contains('ed-word') || ev.target.classList.contains('ed-meaning') ||\n      ev.target.classList.contains('ed-sentence') || ev.target.classList.contains('ed-translation');\n    if (!isEditInput) return;\n    var card = ev.target.closest('.entry');\n    var idx = card ? parseInt(card.getAttribute('data-idx'), 10) : -1;\n    if (ev.key === 'Enter') { ev.preventDefault(); saveEdit(idx); }\n    else if (ev.key === 'Escape') { ev.preventDefault(); cancelEdit(); }\n  });\n}\n\nfunction renderPage(entries) {\n  function j(s) { return JSON.stringify(s).replace(/<\\/script/gi, '<\\\\/script'); }\n  return '<!doctype html>\\n<html lang=\"ko\">\\n<head>\\n' + HEAD_HTML + '\\n</head>\\n<body>\\n' + BODY_SHELL_HTML +\n    '\\n<script>\\nconst HEAD_HTML = ' + j(HEAD_HTML) + ';\\nconst BODY_SHELL_HTML = ' + j(BODY_SHELL_HTML) +\n    ';\\nconst ENGINE_JS = ' + j(ENGINE_JS) + ';\\nconst ENTRIES_NOW = ' + j(entries) +\n    ';\\neval(ENGINE_JS);\\ninit(ENTRIES_NOW);\\n</' + 'script>\\n</body>\\n</html>';\n}\n\nfunction loadStoredEntries() {\n  try {\n    var raw = localStorage.getItem('vocab_ledger_entries');\n    if (!raw) return null;\n    var parsed = JSON.parse(raw);\n    if (Array.isArray(parsed) && parsed.length > 0) return parsed;\n  } catch (e) {}\n  return null;\n}\n\nfunction init(initialEntries) {\n  var stored = loadStoredEntries();\n  ENTRIES = stored || initialEntries || [];\n  studyMode = loadStoredStudyMode();\n  revealedIdx = {};\n  var modeBtn = document.getElementById('toggle-study-mode');\n  if (modeBtn) modeBtn.textContent = studyMode ? '\ud83d\ude48 \ub73b \uac00\ub9ac\uae30: \ucf1c\uc9d0' : '\ud83d\udc41\ufe0f \ub73b \uac00\ub9ac\uae30: \uaebc\uc9d0';\n  attachHandlers();\n  render();\n  chosenRate = loadStoredRate();\n  var rateSel = document.getElementById('rate-select');\n  if (rateSel) rateSel.value = String(chosenRate);\n  if ('speechSynthesis' in window) {\n    loadVoices();\n    window.speechSynthesis.onvoiceschanged = loadVoices;\n  }\n}\n";
+const ENTRIES_NOW = [{"num": 1, "word": "sense", "sentence": "I have a good sense of humor.", "meaning": "명. 감각", "translation": "나는 유머 감각이 좋다.", "day": 1}, {"num": 2, "word": "look", "sentence": "Look at the sky.", "meaning": "동. 보다, 보이다", "translation": "하늘을 봐.", "day": 1}, {"num": 3, "word": "touch", "sentence": "Don't touch the wet paint.", "meaning": "동. 만지다", "translation": "젖은 페인트를 만지지 마.", "day": 1}, {"num": 4, "word": "taste", "sentence": "This soup has a great taste.", "meaning": "명. 맛, 입맛", "translation": "이 수프는 맛이 좋다.", "day": 1}, {"num": 5, "word": "smell", "sentence": "I love the smell of fresh bread.", "meaning": "명. 냄새, 향", "translation": "나는 갓 구운 빵 냄새를 좋아한다.", "day": 1}, {"num": 6, "word": "light", "sentence": "Turn on the light, please.", "meaning": "명. 전등, 빛", "translation": "불 좀 켜줘.", "day": 1}, {"num": 7, "word": "see", "sentence": "I see a bird in the tree.", "meaning": "동. 보다, 알다", "translation": "나무에 새가 보인다.", "day": 1}, {"num": 8, "word": "bright", "sentence": "The sun is very bright today.", "meaning": "형. 밝은, 똑똑한", "translation": "오늘 해가 아주 밝다.", "day": 1}, {"num": 9, "word": "dark", "sentence": "The room is too dark.", "meaning": "형. 어두운", "translation": "방이 너무 어둡다.", "day": 1}, {"num": 10, "word": "delicious", "sentence": "This cake is delicious.", "meaning": "형. 맛있는", "translation": "이 케이크는 맛있다.", "day": 1}, {"num": 11, "word": "scent", "sentence": "The flower has a sweet scent.", "meaning": "명. 향기", "translation": "그 꽃은 달콤한 향기가 난다.", "day": 1}, {"num": 12, "word": "view", "sentence": "We enjoyed the view from the hill.", "meaning": "명. 경치, 의견", "translation": "우리는 언덕에서 경치를 즐겼다.", "day": 1}, {"num": 13, "word": "voice", "sentence": "Her voice is very soft.", "meaning": "명. 목소리, 음성", "translation": "그녀의 목소리는 아주 부드럽다.", "day": 1}, {"num": 14, "word": "hear", "sentence": "Can you hear the music?", "meaning": "동. 듣다, 들리다", "translation": "음악이 들리니?", "day": 1}, {"num": 15, "word": "listen", "sentence": "Listen to your teacher.", "meaning": "동. 듣다", "translation": "선생님 말씀을 들어라.", "day": 1}, {"num": 16, "word": "sound", "sentence": "That sounds great!", "meaning": "동. 들리다", "translation": "그거 좋게 들린다!", "day": 1}, {"num": 17, "word": "stare", "sentence": "Don't stare at strangers.", "meaning": "동. 빤히 보다", "translation": "낯선 사람을 빤히 쳐다보지 마.", "day": 1}, {"num": 18, "word": "loudly", "sentence": "He spoke loudly in class.", "meaning": "부. 큰 소리로", "translation": "그는 수업 시간에 큰 소리로 말했다.", "day": 1}, {"num": 19, "word": "tickle", "sentence": "Don't tickle my feet!", "meaning": "동. 간지럽히다", "translation": "내 발을 간지럽히지 마!", "day": 1}];
+eval(ENGINE_JS);
+init(ENTRIES_NOW);
+</script>
+</body>
+</html>
